@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LocalBite</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body class="dark">
+
+<header>
+<h1>LocalBite</h1>
+<button id="themeBtn">🌙 / ☀️</button>
+</header>
+
+<section class="hero">
+<h2>AI 城市美食推薦</h2>
+<p>輸入你的需求</p>
+
+<input id="userInput" placeholder="今天想找安靜咖啡廳">
+<button onclick="recommend()">Ask AI</button>
+</section>
+
+<section class="result">
+<h3>AI Recommendation</h3>
+<div id="output">尚未推薦</div>
+</section>
+
+<section class="cards">
+<div class="card">
+<h4>☕ Hidden Cafe</h4>
+<p>適合放空與工作</p>
+</div>
+
+<div class="card">
+<h4>🍜 Midnight Ramen</h4>
+<p>深夜療癒拉麵</p>
+</div>
+
+<div class="card">
+<h4>🍷 Secret Bistro</h4>
+<p>約會氛圍感餐廳</p>
+</div>
+</section>
+
+<script src="app.js"></script>
+</body>
+</html>
