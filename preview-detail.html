@@ -25,17 +25,47 @@ html,body { height:100%; overflow:hidden;
   border-top:0.5px solid var(--sep); display:flex; flex-shrink:0;
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
-.tab-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 0; cursor:pointer; }
+.tab-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 0; cursor:pointer; position:relative; }
 .tab-icon svg { width:24px; height:24px; }
 .tab-label { font-size:10px; font-weight:500; color:var(--gray); }
 .tab-item.active .tab-label { color:var(--blue); }
-.tab-badge {
-  position:absolute; top:-2px; right:-2px;
-  background:var(--red); color:#fff; border-radius:8px;
-  font-size:9px; font-weight:700; padding:1px 4px; border:2px solid #fff;
-}
+.tab-badge { position:absolute; top:4px; right:18%; background:var(--red); color:#fff; border-radius:8px; font-size:9px; font-weight:700; padding:1px 4px; border:2px solid #fff; }
 
-/* ── SCREEN 1: 地圖 ── */
+/* Shared */
+.s-content { flex:1; overflow-y:auto; background:var(--gray6); }
+.s-content::-webkit-scrollbar { display:none; }
+.screen-hd { padding:16px 20px 12px; background:#fff; border-bottom:0.5px solid var(--sep); flex-shrink:0; }
+.screen-title { font-size:28px; font-weight:700; letter-spacing:-.5px; }
+.screen-sub { font-size:15px; color:var(--gray); margin-top:2px; }
+.s-head { display:flex; justify-content:space-between; align-items:center; padding:14px 16px 6px; }
+.s-label { font-size:13px; font-weight:600; color:var(--gray); text-transform:uppercase; letter-spacing:.4px; }
+.s-more { font-size:14px; color:var(--blue); font-weight:500; }
+.group { margin:0 16px 4px; background:#fff; border-radius:13px; overflow:hidden; }
+.row { display:flex; align-items:center; gap:12px; padding:12px 14px; border-bottom:0.5px solid #E5E5EA; cursor:pointer; }
+.row:last-child { border-bottom:none; }
+.row:active { background:var(--gray6); }
+.row-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0; }
+.row-main { flex:1; min-width:0; }
+.row-name { font-size:15px; font-weight:600; color:var(--label); }
+.row-sub { font-size:13px; color:var(--gray); margin-top:1px; }
+.row-right { display:flex; flex-direction:column; align-items:flex-end; gap:3px; flex-shrink:0; }
+.row-dist { font-size:12px; color:var(--gray); }
+.row-badge { font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; }
+.b-green { background:#E8F8EE; color:var(--green); }
+.b-orange { background:#FFF3EC; color:var(--orange); }
+.b-blue { background:#EBF4FF; color:var(--blue); }
+.b-gray { background:#F2F2F7; color:var(--gray); }
+.row-arrow { font-size:14px; color:var(--gray2); margin-left:4px; }
+.hscroll { display:flex; gap:10px; padding:6px 16px 12px; overflow-x:auto; }
+.hscroll::-webkit-scrollbar { display:none; }
+.hcard { width:130px; flex-shrink:0; background:#fff; border-radius:13px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+.hcard-img { height:80px; display:flex; align-items:center; justify-content:center; font-size:32px; }
+.hcard-info { padding:9px 11px; }
+.hcard-name { font-size:13px; font-weight:600; }
+.hcard-meta { font-size:11px; color:var(--gray); margin-top:2px; display:flex; align-items:center; gap:4px; }
+.live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); display:inline-block; }
+
+/* ── S1: 地圖 ── */
 .s1-header { background:#fff; border-bottom:0.5px solid var(--sep); flex-shrink:0; padding-top:8px; }
 .s1-title-row { display:flex; align-items:center; padding:0 14px; gap:10px; }
 .s1-title { font-size:17px; font-weight:700; flex:1; }
@@ -45,8 +75,6 @@ html,body { height:100%; overflow:hidden;
 .segment { display:flex; margin:0 14px 10px; background:var(--gray6); border-radius:9px; padding:2px; }
 .seg-item { flex:1; text-align:center; padding:5px 0; border-radius:7px; font-size:13px; font-weight:500; color:var(--gray); cursor:pointer; }
 .seg-item.active { background:#fff; color:var(--label); font-weight:600; box-shadow:0 1px 4px rgba(0,0,0,.12); }
-
-/* Map */
 .map-wrap { flex-shrink:0; height:240px; min-height:80px; max-height:380px; position:relative; overflow:hidden; background:#E0E8F0; }
 .map-wrap::before { content:''; position:absolute; inset:0; background:linear-gradient(#D8E4EE 1px,transparent 1px),linear-gradient(90deg,#D8E4EE 1px,transparent 1px),#E0E8F0; background-size:38px 38px; }
 .mb { position:absolute; background:#EEE8DA; border:1px solid #DDD5C4; border-radius:4px; }
@@ -66,45 +94,11 @@ html,body { height:100%; overflow:hidden;
 .mpill .dot { width:7px; height:7px; border-radius:50%; }
 .map-fabs { position:absolute; right:11px; bottom:10px; z-index:10; display:flex; gap:8px; }
 .mfab { width:38px; height:38px; background:#fff; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:17px; box-shadow:0 2px 10px rgba(0,0,0,.18); }
-
 .drag-handle { height:20px; background:#fff; flex-shrink:0; display:flex; align-items:center; justify-content:center; cursor:ns-resize; border-top:0.5px solid var(--sep); border-bottom:0.5px solid var(--sep); position:relative; z-index:20; user-select:none; }
 .dbar { width:36px; height:4px; background:var(--gray2); border-radius:2px; }
 .drag-handle:active .dbar { background:var(--blue); }
 
-.s1-content,.s2-content,.s4-content,.s5-content { flex:1; overflow-y:auto; background:var(--gray6); }
-.s1-content::-webkit-scrollbar,.s2-content::-webkit-scrollbar,.s4-content::-webkit-scrollbar,.s5-content::-webkit-scrollbar { display:none; }
-
-.s-head { display:flex; justify-content:space-between; align-items:center; padding:14px 16px 6px; }
-.s-title { font-size:13px; font-weight:600; color:var(--gray); text-transform:uppercase; letter-spacing:.4px; }
-.s-more { font-size:14px; color:var(--blue); font-weight:500; }
-.group { margin:0 16px 4px; background:#fff; border-radius:13px; overflow:hidden; }
-.row { display:flex; align-items:center; gap:12px; padding:12px 14px; border-bottom:0.5px solid #E5E5EA; cursor:pointer; }
-.row:last-child { border-bottom:none; }
-.row:active { background:var(--gray6); }
-.row-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0; }
-.row-main { flex:1; min-width:0; }
-.row-name { font-size:15px; font-weight:600; color:var(--label); }
-.row-sub { font-size:13px; color:var(--gray); margin-top:1px; }
-.row-right { display:flex; flex-direction:column; align-items:flex-end; gap:3px; flex-shrink:0; }
-.row-dist { font-size:12px; color:var(--gray); }
-.row-badge { font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; }
-.b-green { background:#E8F8EE; color:var(--green); }
-.b-orange { background:#FFF3EC; color:var(--orange); }
-.b-blue { background:#EBF4FF; color:var(--blue); }
-.row-arrow { font-size:14px; color:var(--gray2); margin-left:4px; }
-.hscroll { display:flex; gap:10px; padding:6px 16px 12px; overflow-x:auto; }
-.hscroll::-webkit-scrollbar { display:none; }
-.hcard { width:130px; flex-shrink:0; background:#fff; border-radius:13px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
-.hcard-img { height:80px; display:flex; align-items:center; justify-content:center; font-size:32px; }
-.hcard-info { padding:9px 11px; }
-.hcard-name { font-size:13px; font-weight:600; color:var(--label); }
-.hcard-meta { font-size:11px; color:var(--gray); margin-top:2px; display:flex; align-items:center; gap:4px; }
-.live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); display:inline-block; }
-
-/* ── SCREEN 2: 行程 ── */
-.s2-header { padding:16px 20px 12px; background:#fff; border-bottom:0.5px solid var(--sep); flex-shrink:0; }
-.screen-title { font-size:28px; font-weight:700; letter-spacing:-.5px; }
-.screen-sub { font-size:15px; color:var(--gray); margin-top:2px; }
+/* ── S2: 行程 ── */
 .trip-card { margin:0 16px 14px; border-radius:20px; overflow:hidden; background:#fff; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,.1); transition:transform .15s; }
 .trip-card:active { transform:scale(.98); }
 .trip-cover { height:150px; display:flex; align-items:flex-end; padding:16px; position:relative; overflow:hidden; }
@@ -128,7 +122,7 @@ html,body { height:100%; overflow:hidden;
 .av:first-child { margin-left:0; }
 .new-trip { margin:0 16px 16px; padding:16px; border:2px dashed #D1D1D6; border-radius:20px; display:flex; align-items:center; justify-content:center; gap:8px; color:var(--blue); font-size:15px; font-weight:600; cursor:pointer; background:#F5F5F7; }
 
-/* ── SCREEN 3: 行程詳細 ── */
+/* ── S3: 行程詳細 ── */
 .s3-wrap { flex:1; display:flex; flex-direction:column; overflow:hidden; }
 .s3-header { background:linear-gradient(135deg,#FF6B6B,#FF8E53); padding:12px 16px; flex-shrink:0; }
 .s3-back { width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.25); display:flex; align-items:center; justify-content:center; font-size:16px; color:#fff; cursor:pointer; margin-bottom:6px; }
@@ -184,12 +178,7 @@ html,body { height:100%; overflow:hidden;
 .tl-tr { flex:1; background:var(--gray6); border-radius:10px; padding:7px 11px; margin-bottom:8px; display:flex; align-items:center; gap:7px; font-size:11px; color:var(--gray); }
 .tl-tr strong { color:#3C3C43; font-weight:600; }
 
-/* ── SCREEN 4: 探索 ── */
-.s4-bar { display:flex; align-items:center; padding:16px 20px 10px; background:#fff; border-bottom:0.5px solid var(--sep); flex-shrink:0; }
-.s4-search { flex:1; display:flex; align-items:center; gap:8px; background:var(--gray6); border-radius:10px; padding:8px 12px; }
-.sec-hd { display:flex; justify-content:space-between; align-items:center; padding:14px 20px 8px; }
-.sec-title { font-size:17px; font-weight:700; }
-.sec-more { font-size:14px; color:var(--blue); font-weight:500; }
+/* ── S4: 探索 ── */
 .dest-row { display:flex; gap:12px; padding:0 16px 16px; overflow-x:auto; }
 .dest-row::-webkit-scrollbar { display:none; }
 .dest-card { width:140px; flex-shrink:0; border-radius:18px; overflow:hidden; background:var(--label); box-shadow:0 4px 16px rgba(0,0,0,.12); cursor:pointer; }
@@ -213,7 +202,27 @@ html,body { height:100%; overflow:hidden;
 .comm-author { font-size:12px; color:var(--gray); }
 .comm-likes { font-size:12px; color:var(--gray); margin-left:auto; }
 
-/* ── SCREEN 5: 我的 ── */
+/* ── S5: 收藏 ── */
+.saved-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:12px 16px; }
+.saved-card { background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.07); cursor:pointer; transition:transform .15s; }
+.saved-card:active { transform:scale(.97); }
+.saved-img { height:100px; display:flex; align-items:center; justify-content:center; font-size:40px; position:relative; }
+.saved-heart { position:absolute; top:8px; right:8px; font-size:16px; }
+.saved-info { padding:9px 11px 11px; }
+.saved-name { font-size:13px; font-weight:600; color:var(--label); }
+.saved-loc { font-size:11px; color:var(--gray); margin-top:2px; }
+.saved-tags { display:flex; gap:4px; margin-top:6px; flex-wrap:wrap; }
+.saved-tag { font-size:10px; padding:2px 7px; border-radius:10px; font-weight:500; }
+.tag-blue { background:#EBF4FF; color:var(--blue); }
+.tag-green { background:#E8F8EE; color:var(--green); }
+.tag-orange { background:#FFF3EC; color:var(--orange); }
+.tag-purple { background:#F0EEFF; color:var(--purple); }
+.saved-filter { display:flex; gap:8px; padding:10px 16px; overflow-x:auto; flex-shrink:0; }
+.saved-filter::-webkit-scrollbar { display:none; }
+.filter-chip { padding:6px 14px; border-radius:20px; font-size:13px; font-weight:500; white-space:nowrap; cursor:pointer; background:var(--gray6); color:var(--gray); flex-shrink:0; }
+.filter-chip.active { background:var(--blue); color:#fff; }
+
+/* ── S6: 我的 ── */
 .profile-hero { background:linear-gradient(135deg,#1D1D1F,#3A3A3C); padding:28px 20px 20px; display:flex; flex-direction:column; align-items:center; flex-shrink:0; }
 .p-av { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,var(--blue),var(--purple)); display:flex; align-items:center; justify-content:center; font-size:32px; color:#fff; margin-bottom:10px; border:3px solid rgba(255,255,255,.2); }
 .p-name { font-size:20px; font-weight:700; color:#fff; }
@@ -243,10 +252,7 @@ html,body { height:100%; overflow:hidden;
         <div class="icon-btn">🔔</div>
         <div class="icon-btn">👤</div>
       </div>
-      <div class="s1-search">
-        <span>🔍</span>
-        <input placeholder="搜尋景點、美食、住宿...">
-      </div>
+      <div class="s1-search"><span>🔍</span><input placeholder="搜尋景點、美食、住宿..."></div>
       <div class="segment">
         <div class="seg-item active" onclick="setSeg(this)">全部</div>
         <div class="seg-item" onclick="setSeg(this)">景點</div>
@@ -287,8 +293,8 @@ html,body { height:100%; overflow:hidden;
       <div class="map-fabs"><div class="mfab">＋</div><div class="mfab">📍</div></div>
     </div>
     <div class="drag-handle" id="dh1"><div class="dbar"></div></div>
-    <div class="s1-content">
-      <div class="s-head"><span class="s-title">📋 進行中行程</span><span class="s-more">查看全部</span></div>
+    <div class="s-content">
+      <div class="s-head"><span class="s-label">📋 進行中行程</span><span class="s-more">查看全部</span></div>
       <div class="group">
         <div class="row" onclick="go(2)">
           <div class="row-icon" style="background:linear-gradient(135deg,#FF6B6B,#FF8E53)">🗾</div>
@@ -297,14 +303,14 @@ html,body { height:100%; overflow:hidden;
           <div class="row-arrow">›</div>
         </div>
       </div>
-      <div class="s-head"><span class="s-title">📍 附近景點</span><span class="s-more">地圖</span></div>
+      <div class="s-head"><span class="s-label">📍 附近景點</span><span class="s-more">地圖</span></div>
       <div class="hscroll">
         <div class="hcard"><div class="hcard-img" style="background:linear-gradient(135deg,#E3F2FD,#BBDEFB)">🏛</div><div class="hcard-info"><div class="hcard-name">龍山寺</div><div class="hcard-meta"><span class="live-dot"></span>0.3 km · 免費</div></div></div>
-        <div class="hcard"><div class="hcard-img" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9)">🌿</div><div class="hcard-info"><div class="hcard-name">大安公園</div><div class="hcard-meta"><span class="live-dot"></span>0.8 km · 免費</div></div></div>
+        <div class="hcard"><div class="hcard-img" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9)">🌿</div><div class="hcard-info"><div class="hcard-name">大安公園</div><div class="hcard-meta"><span class="live-dot"></span>0.8 km</div></div></div>
         <div class="hcard"><div class="hcard-img" style="background:linear-gradient(135deg,#FFF3E0,#FFE0B2)">🍜</div><div class="hcard-info"><div class="hcard-name">鼎泰豐</div><div class="hcard-meta">0.4 km · $$</div></div></div>
         <div class="hcard"><div class="hcard-img" style="background:linear-gradient(135deg,#EDE7F6,#D1C4E9)">🗼</div><div class="hcard-info"><div class="hcard-name">台北 101</div><div class="hcard-meta">1.2 km · $$$</div></div></div>
       </div>
-      <div class="s-head"><span class="s-title">⭐ 熱門推薦</span><span class="s-more">更多</span></div>
+      <div class="s-head"><span class="s-label">⭐ 熱門推薦</span><span class="s-more">更多</span></div>
       <div class="group">
         <div class="row"><div class="row-icon" style="background:#FFF3EC">🍜</div><div class="row-main"><div class="row-name">鼎泰豐 信義店</div><div class="row-sub">中式料理 · ★ 4.9</div></div><div class="row-right"><div class="row-dist">0.4 km</div><div class="row-badge b-orange">等候 45 分</div></div><div class="row-arrow">›</div></div>
         <div class="row"><div class="row-icon" style="background:#E8F5E9">🌿</div><div class="row-main"><div class="row-name">大安森林公園</div><div class="row-sub">自然景觀 · ★ 4.7</div></div><div class="row-right"><div class="row-dist">0.8 km</div><div class="row-badge b-green">開放中</div></div><div class="row-arrow">›</div></div>
@@ -317,8 +323,8 @@ html,body { height:100%; overflow:hidden;
 
   <!-- ══ S2: 我的行程 ══ -->
   <div class="screen" id="s2">
-    <div class="s2-header"><div class="screen-title">我的行程</div><div class="screen-sub">3 個旅程</div></div>
-    <div class="s2-content">
+    <div class="screen-hd"><div class="screen-title">我的行程</div><div class="screen-sub">3 個旅程</div></div>
+    <div class="s-content">
       <div style="height:12px"></div>
       <div class="trip-card" onclick="go(3)">
         <div class="trip-cover cov-jp"><div class="cov-ov"></div><div class="cov-em">🗾</div><div class="cov-badge badge-go">進行中</div></div>
@@ -387,25 +393,13 @@ html,body { height:100%; overflow:hidden;
         <div class="s3-scroll">
           <div class="weather"><span style="font-size:20px">⛅</span><div><div class="w-t">22°C</div><div class="w-d">多雲 · 東京都</div></div><div class="w-ex"><span>💧68%</span><span>💨12km/h</span></div></div>
           <div class="timeline">
-            <div class="tl-row">
-              <div class="tl-l"><div class="tl-t">09:00</div><div class="tl-d sp"></div><div class="tl-li"></div></div>
-              <div class="tl-card"><div class="tl-top"><div class="tl-name"><div class="nb" style="background:#007AFF">1</div>🛬 成田機場抵達</div><div class="tl-dur">60 分</div></div><div class="tl-meta">入境 · 換 Suica · 領行李</div><div class="tl-acts"><span class="tl-a">🗺 地圖</span><span class="tl-a">📝 備註</span></div></div>
-            </div>
+            <div class="tl-row"><div class="tl-l"><div class="tl-t">09:00</div><div class="tl-d sp"></div><div class="tl-li"></div></div><div class="tl-card"><div class="tl-top"><div class="tl-name"><div class="nb" style="background:#007AFF">1</div>🛬 成田機場抵達</div><div class="tl-dur">60 分</div></div><div class="tl-meta">入境 · 換 Suica · 領行李</div><div class="tl-acts"><span class="tl-a">🗺 地圖</span><span class="tl-a">📝 備註</span></div></div></div>
             <div class="tl-row"><div class="tl-l"><div class="tl-t"></div><div class="tl-d mv"></div><div class="tl-li da"></div></div><div class="tl-tr">🚆 成田 Express <strong>50 分鐘 · ¥3,070</strong></div></div>
-            <div class="tl-row">
-              <div class="tl-l"><div class="tl-t">12:00</div><div class="tl-d fd"></div><div class="tl-li"></div></div>
-              <div class="tl-card"><div class="tl-top"><div class="tl-name"><div class="nb" style="background:#FF6B35">2</div>🍜 一蘭拉麵 銀座</div><div class="tl-dur">60 分</div></div><div class="tl-meta">美食 · ¥1,200 / 人</div><div class="tl-acts"><span class="tl-a">🗺 導航</span><span class="tl-a">💰 記帳</span></div></div>
-            </div>
+            <div class="tl-row"><div class="tl-l"><div class="tl-t">12:00</div><div class="tl-d fd"></div><div class="tl-li"></div></div><div class="tl-card"><div class="tl-top"><div class="tl-name"><div class="nb" style="background:#FF6B35">2</div>🍜 一蘭拉麵 銀座</div><div class="tl-dur">60 分</div></div><div class="tl-meta">美食 · ¥1,200 / 人</div><div class="tl-acts"><span class="tl-a">🗺 導航</span><span class="tl-a">💰 記帳</span></div></div></div>
             <div class="tl-row"><div class="tl-l"><div class="tl-t"></div><div class="tl-d mv"></div><div class="tl-li da"></div></div><div class="tl-tr">🚇 銀座線 <strong>18 分鐘 · ¥200</strong></div></div>
-            <div class="tl-row">
-              <div class="tl-l"><div class="tl-t">14:00</div><div class="tl-d sp"></div><div class="tl-li"></div></div>
-              <div class="tl-card"><div class="tl-top"><div class="tl-name"><div class="nb" style="background:#34C759">3</div>🏛 淺草寺 · 仲見世通</div><div class="tl-dur">120 分</div></div><div class="tl-meta">景點 · 免費 · 台東區</div><div class="tl-acts"><span class="tl-a">🗺 地圖</span><span class="tl-a">📸 相片</span></div></div>
-            </div>
+            <div class="tl-row"><div class="tl-l"><div class="tl-t">14:00</div><div class="tl-d sp"></div><div class="tl-li"></div></div><div class="tl-card"><div class="tl-top"><div class="tl-name"><div class="nb" style="background:#34C759">3</div>🏛 淺草寺 · 仲見世通</div><div class="tl-dur">120 分</div></div><div class="tl-meta">景點 · 免費 · 台東區</div><div class="tl-acts"><span class="tl-a">🗺 地圖</span><span class="tl-a">📸 相片</span></div></div></div>
             <div class="tl-row"><div class="tl-l"><div class="tl-t"></div><div class="tl-d mv"></div><div class="tl-li da"></div></div><div class="tl-tr">🚇 大江戶線 <strong>22 分鐘 · ¥220</strong></div></div>
-            <div class="tl-row">
-              <div class="tl-l"><div class="tl-t">20:00</div><div class="tl-d ht"></div></div>
-              <div class="tl-card"><div class="tl-top"><div class="tl-name"><div class="nb" style="background:#5856D6">4</div>🏨 新宿 Prince Hotel</div><div class="tl-dur">入住</div></div><div class="tl-meta">住宿 · ¥12,000 / 晚</div><div class="tl-acts"><span class="tl-a">🗺 導航</span><span class="tl-a">📋 訂單</span></div></div>
-            </div>
+            <div class="tl-row"><div class="tl-l"><div class="tl-t">20:00</div><div class="tl-d ht"></div></div><div class="tl-card"><div class="tl-top"><div class="tl-name"><div class="nb" style="background:#5856D6">4</div>🏨 新宿 Prince Hotel</div><div class="tl-dur">入住</div></div><div class="tl-meta">住宿 · ¥12,000 / 晚</div><div class="tl-acts"><span class="tl-a">🗺 導航</span><span class="tl-a">📋 訂單</span></div></div></div>
           </div>
         </div>
       </div>
@@ -414,31 +408,74 @@ html,body { height:100%; overflow:hidden;
 
   <!-- ══ S4: 探索 ══ -->
   <div class="screen" id="s4">
-    <div class="s4-bar"><div class="screen-title" style="font-size:24px">探索</div></div>
-    <div class="s4-content">
-      <div style="padding:10px 16px"><div class="s4-search"><span>🔍</span><span style="font-size:15px;color:#8E8E93">搜尋目的地、行程...</span></div></div>
-      <div class="sec-hd"><span class="sec-title">🔥 熱門目的地</span><span class="sec-more">更多</span></div>
+    <div class="screen-hd"><div class="screen-title">探索</div><div class="screen-sub">發現新旅程</div></div>
+    <div class="s-content">
+      <div style="padding:10px 16px 0"><div style="display:flex;align-items:center;gap:8px;background:var(--gray6);border-radius:10px;padding:9px 13px"><span>🔍</span><span style="font-size:15px;color:var(--gray)">搜尋目的地、行程...</span></div></div>
+      <div class="s-head" style="padding-top:16px"><span style="font-size:17px;font-weight:700">🔥 熱門目的地</span><span class="s-more">更多</span></div>
       <div class="dest-row">
-        <div class="dest-card"><div class="dest-img d-jp">🗾</div><div class="dest-info"><div class="dest-name">東京</div><div class="dest-meta">42 個行程</div></div></div>
+        <div class="dest-card"><div class="dest-img d-jp">🗾</div><div class="dest-info"><div class="dest-name">東京</div><div class="dest-meta">42 個行程 · 熱門</div></div></div>
         <div class="dest-card"><div class="dest-img d-fr">🗼</div><div class="dest-info"><div class="dest-name">巴黎</div><div class="dest-meta">28 個行程</div></div></div>
         <div class="dest-card"><div class="dest-img d-ba">🌴</div><div class="dest-info"><div class="dest-name">峇里島</div><div class="dest-meta">35 個行程</div></div></div>
         <div class="dest-card"><div class="dest-img d-sg">🦁</div><div class="dest-info"><div class="dest-name">新加坡</div><div class="dest-meta">19 個行程</div></div></div>
       </div>
-      <div class="sec-hd"><span class="sec-title">✨ 社群精選</span><span class="sec-more">更多</span></div>
-      <div class="comm-card">
-        <div class="comm-img d-jp"><div class="comm-ov"></div><span style="position:relative;z-index:1">🍜</span></div>
-        <div class="comm-body"><div class="comm-title">東京美食朝聖 7 天懶人包</div><div class="comm-meta">📍 東京 · 7 天 · 34 個景點</div><div class="comm-foot"><span class="comm-author">👤 旅遊達人 Mia</span><span class="comm-likes">❤️ 1.2k</span></div></div>
-      </div>
-      <div class="comm-card">
-        <div class="comm-img d-ba"><div class="comm-ov"></div><span style="position:relative;z-index:1">🌅</span></div>
-        <div class="comm-body"><div class="comm-title">峇里島靈性之旅 5 天</div><div class="comm-meta">📍 峇里島 · 5 天 · 18 個景點</div><div class="comm-foot"><span class="comm-author">👤 Ken 的旅記</span><span class="comm-likes">❤️ 876</span></div></div>
+      <div class="s-head"><span style="font-size:17px;font-weight:700">✨ 社群精選</span><span class="s-more">更多</span></div>
+      <div class="comm-card"><div class="comm-img d-jp"><div class="comm-ov"></div><span style="position:relative;z-index:1">🍜</span></div><div class="comm-body"><div class="comm-title">東京美食朝聖 7 天懶人包</div><div class="comm-meta">📍 東京 · 7 天 · 34 個景點</div><div class="comm-foot"><span class="comm-author">👤 旅遊達人 Mia</span><span class="comm-likes">❤️ 1.2k</span></div></div></div>
+      <div class="comm-card"><div class="comm-img d-ba"><div class="comm-ov"></div><span style="position:relative;z-index:1">🌅</span></div><div class="comm-body"><div class="comm-title">峇里島靈性之旅 5 天</div><div class="comm-meta">📍 峇里島 · 5 天 · 18 個景點</div><div class="comm-foot"><span class="comm-author">👤 Ken 的旅記</span><span class="comm-likes">❤️ 876</span></div></div></div>
+      <div style="height:12px"></div>
+    </div>
+  </div>
+
+  <!-- ══ S5: 收藏 ══ -->
+  <div class="screen" id="s5">
+    <div class="screen-hd"><div class="screen-title">我的收藏</div><div class="screen-sub">18 個景點已收藏</div></div>
+    <div class="saved-filter">
+      <div class="filter-chip active" onclick="setFilter(this)">全部</div>
+      <div class="filter-chip" onclick="setFilter(this)">🏛 景點</div>
+      <div class="filter-chip" onclick="setFilter(this)">🍜 美食</div>
+      <div class="filter-chip" onclick="setFilter(this)">🏨 住宿</div>
+      <div class="filter-chip" onclick="setFilter(this)">☕ 咖啡</div>
+    </div>
+    <div class="s-content">
+      <div class="saved-grid">
+        <div class="saved-card">
+          <div class="saved-img" style="background:linear-gradient(135deg,#E3F2FD,#BBDEFB)">🏛<span class="saved-heart">❤️</span></div>
+          <div class="saved-info"><div class="saved-name">淺草寺</div><div class="saved-loc">📍 東京 · 台東區</div><div class="saved-tags"><span class="saved-tag tag-blue">景點</span><span class="saved-tag tag-green">免費</span></div></div>
+        </div>
+        <div class="saved-card">
+          <div class="saved-img" style="background:linear-gradient(135deg,#FFF3E0,#FFE0B2)">🍜<span class="saved-heart">❤️</span></div>
+          <div class="saved-info"><div class="saved-name">一蘭拉麵</div><div class="saved-loc">📍 東京 · 銀座</div><div class="saved-tags"><span class="saved-tag tag-orange">美食</span><span class="saved-tag tag-blue">$$</span></div></div>
+        </div>
+        <div class="saved-card">
+          <div class="saved-img" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9)">🌿<span class="saved-heart">❤️</span></div>
+          <div class="saved-info"><div class="saved-name">大安森林公園</div><div class="saved-loc">📍 台北 · 大安區</div><div class="saved-tags"><span class="saved-tag tag-green">景點</span><span class="saved-tag tag-green">免費</span></div></div>
+        </div>
+        <div class="saved-card">
+          <div class="saved-img" style="background:linear-gradient(135deg,#EDE7F6,#D1C4E9)">🗼<span class="saved-heart">❤️</span></div>
+          <div class="saved-info"><div class="saved-name">台北 101</div><div class="saved-loc">📍 台北 · 信義區</div><div class="saved-tags"><span class="saved-tag tag-blue">景點</span><span class="saved-tag tag-orange">$$$</span></div></div>
+        </div>
+        <div class="saved-card">
+          <div class="saved-img" style="background:linear-gradient(135deg,#FFF9E6,#FFECB3)">☕<span class="saved-heart">❤️</span></div>
+          <div class="saved-info"><div class="saved-name">路易莎咖啡</div><div class="saved-loc">📍 台北 · 大安區</div><div class="saved-tags"><span class="saved-tag tag-orange">咖啡</span><span class="saved-tag tag-green">$</span></div></div>
+        </div>
+        <div class="saved-card">
+          <div class="saved-img" style="background:linear-gradient(135deg,#FCE4EC,#F8BBD0)">🏨<span class="saved-heart">❤️</span></div>
+          <div class="saved-info"><div class="saved-name">新宿 Prince Hotel</div><div class="saved-loc">📍 東京 · 新宿</div><div class="saved-tags"><span class="saved-tag tag-purple">住宿</span><span class="saved-tag tag-orange">$$</span></div></div>
+        </div>
+        <div class="saved-card">
+          <div class="saved-img" style="background:linear-gradient(135deg,#E0F7FA,#B2EBF2)">🌊<span class="saved-heart">❤️</span></div>
+          <div class="saved-info"><div class="saved-name">鎌倉海岸</div><div class="saved-loc">📍 神奈川 · 鎌倉</div><div class="saved-tags"><span class="saved-tag tag-blue">景點</span><span class="saved-tag tag-green">免費</span></div></div>
+        </div>
+        <div class="saved-card">
+          <div class="saved-img" style="background:linear-gradient(135deg,#F3E5F5,#E1BEE7)">⛩️<span class="saved-heart">❤️</span></div>
+          <div class="saved-info"><div class="saved-name">伏見稻荷</div><div class="saved-loc">📍 京都 · 伏見區</div><div class="saved-tags"><span class="saved-tag tag-blue">景點</span><span class="saved-tag tag-green">免費</span></div></div>
+        </div>
       </div>
       <div style="height:12px"></div>
     </div>
   </div>
 
-  <!-- ══ S5: 我的 ══ -->
-  <div class="screen" id="s5">
+  <!-- ══ S6: 我的 ══ -->
+  <div class="screen" id="s6">
     <div class="profile-hero">
       <div class="p-av">😊</div>
       <div class="p-name">旅行者 Alex</div>
@@ -449,7 +486,7 @@ html,body { height:100%; overflow:hidden;
         <div class="pst"><div class="pst-n">23</div><div class="pst-l">國家</div></div>
       </div>
     </div>
-    <div class="s5-content">
+    <div class="s-content">
       <div style="height:12px"></div>
       <div class="stt-group">
         <div class="stt-row"><div class="stt-icon" style="background:#EBF4FF">📍</div><div class="stt-label">我的收藏景點</div><div class="stt-arrow">›</div></div>
@@ -470,7 +507,7 @@ html,body { height:100%; overflow:hidden;
     </div>
   </div>
 
-  <!-- ══ Tab Bar ══ -->
+  <!-- ══ Tab Bar (5 tabs) ══ -->
   <div class="tab-bar">
     <div class="tab-item active" id="t0" onclick="go(1)">
       <div class="tab-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#007AFF"/></svg></div>
@@ -485,6 +522,10 @@ html,body { height:100%; overflow:hidden;
       <div class="tab-label">探索</div>
     </div>
     <div class="tab-item" id="t3" onclick="go(5)">
+      <div class="tab-icon"><svg viewBox="0 0 24 24"><path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402 0-3.791 3.068-5.191 5.281-5.191 1.312 0 4.151.501 5.719 4.457 1.59-3.968 4.464-4.447 5.726-4.447 2.54 0 5.274 1.621 5.274 5.181 0 4.069-5.136 8.625-11 14.402z" fill="#8E8E93"/></svg></div>
+      <div class="tab-label">收藏</div>
+    </div>
+    <div class="tab-item" id="t4" onclick="go(6)">
       <div class="tab-icon"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#8E8E93"/></svg></div>
       <div class="tab-label">我的</div>
     </div>
@@ -492,38 +533,42 @@ html,body { height:100%; overflow:hidden;
 </div>
 
 <script>
+const tabMap = {1:0, 2:1, 3:1, 4:2, 5:3, 6:4};
 function go(n) {
-  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('s'+n).classList.add('active');
-  const map={1:0,2:1,3:1,4:2,5:3};
-  document.querySelectorAll('.tab-item').forEach((t,i)=>{
+  document.querySelectorAll('.tab-item').forEach((t,i) => {
     t.classList.remove('active');
-    t.querySelector('.tab-label').style.color='';
-    t.querySelectorAll('svg path').forEach(p=>p.style.fill='');
+    t.querySelector('.tab-label').style.color = '';
+    t.querySelectorAll('svg path').forEach(p => p.style.fill = '');
   });
-  const ti=map[n]??0;
-  const tab=document.getElementById('t'+ti);
+  const ti = tabMap[n] ?? 0;
+  const tab = document.getElementById('t'+ti);
   tab.classList.add('active');
-  tab.querySelector('.tab-label').style.color='#007AFF';
-  tab.querySelectorAll('svg path').forEach(p=>p.style.fill='#007AFF');
+  tab.querySelector('.tab-label').style.color = '#007AFF';
+  tab.querySelectorAll('svg path').forEach(p => p.style.fill = '#007AFF');
 }
-function setSeg(el){
-  el.parentElement.querySelectorAll('.seg-item').forEach(s=>s.classList.remove('active'));
+function setSeg(el) {
+  el.parentElement.querySelectorAll('.seg-item').forEach(s => s.classList.remove('active'));
   el.classList.add('active');
 }
-function setDay(el){
-  el.parentElement.querySelectorAll('.day-tab').forEach(t=>t.classList.remove('active'));
+function setDay(el) {
+  el.parentElement.querySelectorAll('.day-tab').forEach(t => t.classList.remove('active'));
   el.classList.add('active');
 }
-function makeDrag(dhId,mapId,min,max){
-  const dh=document.getElementById(dhId),map=document.getElementById(mapId);
-  let on=false,sy=0,sh=0;
-  dh.addEventListener('pointerdown',e=>{on=true;sy=e.clientY;sh=map.offsetHeight;dh.setPointerCapture(e.pointerId);e.preventDefault();});
-  dh.addEventListener('pointermove',e=>{if(!on)return;map.style.height=Math.min(Math.max(sh+e.clientY-sy,min),max)+'px';});
-  dh.addEventListener('pointerup',()=>on=false);
+function setFilter(el) {
+  el.parentElement.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
 }
-makeDrag('dh1','m1',80,380);
-makeDrag('dh3','m3',80,380);
+function makeDrag(dhId, mapId) {
+  const dh = document.getElementById(dhId), map = document.getElementById(mapId);
+  let on=false, sy=0, sh=0;
+  dh.addEventListener('pointerdown', e => { on=true; sy=e.clientY; sh=map.offsetHeight; dh.setPointerCapture(e.pointerId); e.preventDefault(); });
+  dh.addEventListener('pointermove', e => { if(!on) return; map.style.height = Math.min(Math.max(sh+e.clientY-sy, 80), 380)+'px'; });
+  dh.addEventListener('pointerup', () => on=false);
+}
+makeDrag('dh1','m1');
+makeDrag('dh3','m3');
 go(1);
 </script>
 </body>
