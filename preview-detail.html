@@ -2,584 +2,529 @@
 <html lang="zh-TW">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>行程詳細 — 預覽</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>旅遊 App</title>
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-    background: #F2F2F7;
-    display: flex;
-    justify-content: center;
-    padding: 40px 20px;
-  }
-  .phone {
-    width: 390px;
-    height: 844px;
-    background: #fff;
-    border-radius: 54px;
-    box-shadow: 0 0 0 2px #1D1D1F, 0 0 0 4px #3A3A3C, 0 40px 80px rgba(0,0,0,0.25);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-  }
-  .phone::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 50%;
-    transform: translateX(-50%);
-    width: 126px; height: 34px;
-    background: #1D1D1F;
-    border-radius: 0 0 20px 20px;
-    z-index: 100;
-  }
-  .status-bar {
-    display: flex;
-    justify-content: space-between;
-    padding: 48px 28px 0;
-    font-size: 13px;
-    font-weight: 600;
-    color: #fff;
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    z-index: 10;
-  }
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+:root {
+  --blue:#007AFF; --orange:#FF6B35; --green:#34C759;
+  --purple:#5856D6; --red:#FF3B30; --gray:#8E8E93;
+  --gray2:#AEAEB2; --gray6:#F2F2F7; --label:#1D1D1F;
+  --sep:#C6C6C8;
+}
+html,body { height:100%; overflow:hidden;
+  font-family:-apple-system,BlinkMacSystemFont,'PingFang TC','Helvetica Neue',sans-serif;
+  background:var(--gray6); color:var(--label); }
+.app { display:flex; flex-direction:column; height:100vh; height:100dvh; overflow:hidden; }
+.screen { display:none; flex:1; flex-direction:column; overflow:hidden; min-height:0; }
+.screen.active { display:flex; }
 
-  /* ── Header ── */
-  .header {
-    background: linear-gradient(135deg, #FF6B6B, #FF8E53);
-    padding: 60px 16px 14px;
-    flex-shrink: 0;
-    position: relative;
-  }
-  .back-btn {
-    position: absolute;
-    top: 52px; left: 16px;
-    width: 32px; height: 32px;
-    background: rgba(255,255,255,0.25);
-    backdrop-filter: blur(8px);
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px; color: #fff;
-    cursor: pointer;
-  }
-  .trip-title { font-size: 20px; font-weight: 700; color: #fff; }
-  .trip-sub { font-size: 13px; color: rgba(255,255,255,0.85); margin-top: 2px; }
+/* Tab Bar */
+.tab-bar {
+  background:rgba(255,255,255,0.95); backdrop-filter:blur(20px);
+  border-top:0.5px solid var(--sep); display:flex; flex-shrink:0;
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+.tab-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 0; cursor:pointer; }
+.tab-icon svg { width:24px; height:24px; }
+.tab-label { font-size:10px; font-weight:500; color:var(--gray); }
+.tab-item.active .tab-label { color:var(--blue); }
+.tab-badge {
+  position:absolute; top:-2px; right:-2px;
+  background:var(--red); color:#fff; border-radius:8px;
+  font-size:9px; font-weight:700; padding:1px 4px; border:2px solid #fff;
+}
 
-  /* ── Day Tabs ── */
-  .day-tabs {
-    display: flex;
-    gap: 8px;
-    padding: 12px 16px 8px;
-    overflow-x: auto;
-    flex-shrink: 0;
-    background: #fff;
-    border-bottom: 1px solid #F2F2F7;
-  }
-  .day-tabs::-webkit-scrollbar { display: none; }
-  .day-tab {
-    display: flex; flex-direction: column; align-items: center;
-    padding: 8px 14px;
-    border-radius: 14px;
-    flex-shrink: 0;
-    background: #F5F5F7;
-    cursor: pointer;
-    min-width: 62px;
-  }
-  .day-tab.active { background: #1D1D1F; }
-  .day-tab .dn { font-size: 18px; font-weight: 700; color: #1D1D1F; }
-  .day-tab.active .dn { color: #fff; }
-  .day-tab .dl { font-size: 10px; color: #86868B; }
-  .day-tab.active .dl { color: rgba(255,255,255,0.65); }
-  .day-tab .dw { font-size: 10px; color: #86868B; margin-top: 2px; }
-  .day-tab.active .dw { color: rgba(255,255,255,0.65); }
+/* ── SCREEN 1: 地圖 ── */
+.s1-header { background:#fff; border-bottom:0.5px solid var(--sep); flex-shrink:0; padding-top:8px; }
+.s1-title-row { display:flex; align-items:center; padding:0 14px; gap:10px; }
+.s1-title { font-size:17px; font-weight:700; flex:1; }
+.icon-btn { width:34px; height:34px; border-radius:50%; background:var(--gray6); display:flex; align-items:center; justify-content:center; font-size:17px; cursor:pointer; }
+.s1-search { display:flex; align-items:center; gap:7px; margin:8px 14px; background:var(--gray6); border-radius:10px; padding:8px 12px; }
+.s1-search input { border:none; outline:none; background:transparent; font-size:15px; color:var(--label); flex:1; font-family:inherit; }
+.segment { display:flex; margin:0 14px 10px; background:var(--gray6); border-radius:9px; padding:2px; }
+.seg-item { flex:1; text-align:center; padding:5px 0; border-radius:7px; font-size:13px; font-weight:500; color:var(--gray); cursor:pointer; }
+.seg-item.active { background:#fff; color:var(--label); font-weight:600; box-shadow:0 1px 4px rgba(0,0,0,.12); }
 
-  /* ── Map ── */
-  .map-section {
-    height: 220px;
-    flex-shrink: 0;
-    position: relative;
-    background: #EEF2F5;
-    overflow: hidden;
-  }
-  .map-bg {
-    width: 100%; height: 100%;
-    background:
-      linear-gradient(#E8F4FD 1px, transparent 1px),
-      linear-gradient(90deg, #E8F4FD 1px, transparent 1px),
-      #EEF2F5;
-    background-size: 36px 36px;
-    position: relative;
-  }
-  .road { position: absolute; background: #fff; }
-  .road.h { height: 7px; width: 100%; }
-  .road.v { width: 7px; height: 100%; }
-  .road.h.main { height: 11px; background: #FDE68A; opacity: 0.7; }
-  .block { position: absolute; background: #F5F0E8; border: 1px solid #E0D8CC; border-radius: 3px; }
-  .park { position: absolute; background: #C8E6C9; border-radius: 6px; }
-  .water { position: absolute; background: #B3D9F7; }
+/* Map */
+.map-wrap { flex-shrink:0; height:240px; min-height:80px; max-height:380px; position:relative; overflow:hidden; background:#E0E8F0; }
+.map-wrap::before { content:''; position:absolute; inset:0; background:linear-gradient(#D8E4EE 1px,transparent 1px),linear-gradient(90deg,#D8E4EE 1px,transparent 1px),#E0E8F0; background-size:38px 38px; }
+.mb { position:absolute; background:#EEE8DA; border:1px solid #DDD5C4; border-radius:4px; }
+.mr { position:absolute; background:#fff; }
+.mr.h { height:8px; width:100%; } .mr.v { width:8px; height:100%; }
+.mr.yh { height:13px; background:#FDE68A; opacity:.75; }
+.mpk { position:absolute; background:#BAD8B8; border-radius:6px; }
+.mwt { position:absolute; background:#A4C8E4; }
+.rsvg { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; z-index:4; }
+.mpin { position:absolute; z-index:6; display:flex; flex-direction:column; align-items:center; cursor:pointer; }
+.mpin-outer { width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; box-shadow:0 3px 10px rgba(0,0,0,.25); border:2.5px solid #fff; }
+.mpin-label { margin-top:3px; background:#fff; border-radius:6px; padding:2px 7px; font-size:10px; font-weight:600; color:var(--label); box-shadow:0 1px 5px rgba(0,0,0,.15); white-space:nowrap; }
+.mpin-label.sel { background:var(--blue); color:#fff; }
+.udot { position:absolute; z-index:7; width:16px; height:16px; border-radius:50%; background:var(--blue); border:3px solid #fff; box-shadow:0 0 0 6px rgba(0,122,255,.2); }
+.map-status { position:absolute; left:12px; bottom:10px; z-index:10; display:flex; gap:6px; }
+.mpill { background:rgba(255,255,255,.95); border-radius:20px; padding:5px 11px; font-size:11px; font-weight:600; color:var(--label); box-shadow:0 2px 8px rgba(0,0,0,.15); display:flex; align-items:center; gap:4px; }
+.mpill .dot { width:7px; height:7px; border-radius:50%; }
+.map-fabs { position:absolute; right:11px; bottom:10px; z-index:10; display:flex; gap:8px; }
+.mfab { width:38px; height:38px; background:#fff; border-radius:11px; display:flex; align-items:center; justify-content:center; font-size:17px; box-shadow:0 2px 10px rgba(0,0,0,.18); }
 
-  /* Route path SVG */
-  .route-svg {
-    position: absolute;
-    inset: 0;
-    width: 100%; height: 100%;
-    pointer-events: none;
-  }
+.drag-handle { height:20px; background:#fff; flex-shrink:0; display:flex; align-items:center; justify-content:center; cursor:ns-resize; border-top:0.5px solid var(--sep); border-bottom:0.5px solid var(--sep); position:relative; z-index:20; user-select:none; }
+.dbar { width:36px; height:4px; background:var(--gray2); border-radius:2px; }
+.drag-handle:active .dbar { background:var(--blue); }
 
-  /* Numbered pins */
-  .pin {
-    position: absolute;
-    display: flex; flex-direction: column; align-items: center;
-    z-index: 5;
-    cursor: pointer;
-  }
-  .pin-circle {
-    width: 28px; height: 28px;
-    border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
-    display: flex; align-items: center; justify-content: center;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.25);
-  }
-  .pin-num {
-    transform: rotate(45deg);
-    font-size: 12px; font-weight: 700; color: #fff;
-    line-height: 1;
-  }
-  .pin.p1 .pin-circle { background: #007AFF; }
-  .pin.p2 .pin-circle { background: #FF6B35; }
-  .pin.p3 .pin-circle { background: #34C759; }
-  .pin.p4 .pin-circle { background: #5856D6; }
-  .pin-label {
-    margin-top: 3px;
-    background: #fff;
-    border-radius: 8px;
-    padding: 2px 7px;
-    font-size: 10px; font-weight: 600; color: #1D1D1F;
-    white-space: nowrap;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
-  }
+.s1-content,.s2-content,.s4-content,.s5-content { flex:1; overflow-y:auto; background:var(--gray6); }
+.s1-content::-webkit-scrollbar,.s2-content::-webkit-scrollbar,.s4-content::-webkit-scrollbar,.s5-content::-webkit-scrollbar { display:none; }
 
-  /* Map legend */
-  .map-legend {
-    position: absolute;
-    top: 10px; right: 12px;
-    background: rgba(255,255,255,0.92);
-    backdrop-filter: blur(8px);
-    border-radius: 12px;
-    padding: 8px 10px;
-    font-size: 11px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  }
-  .legend-item {
-    display: flex; align-items: center; gap: 5px;
-    margin-bottom: 3px; color: #3C3C43;
-  }
-  .legend-item:last-child { margin-bottom: 0; }
-  .legend-dot {
-    width: 8px; height: 8px; border-radius: 50%;
-  }
+.s-head { display:flex; justify-content:space-between; align-items:center; padding:14px 16px 6px; }
+.s-title { font-size:13px; font-weight:600; color:var(--gray); text-transform:uppercase; letter-spacing:.4px; }
+.s-more { font-size:14px; color:var(--blue); font-weight:500; }
+.group { margin:0 16px 4px; background:#fff; border-radius:13px; overflow:hidden; }
+.row { display:flex; align-items:center; gap:12px; padding:12px 14px; border-bottom:0.5px solid #E5E5EA; cursor:pointer; }
+.row:last-child { border-bottom:none; }
+.row:active { background:var(--gray6); }
+.row-icon { width:40px; height:40px; border-radius:10px; display:flex; align-items:center; justify-content:center; font-size:19px; flex-shrink:0; }
+.row-main { flex:1; min-width:0; }
+.row-name { font-size:15px; font-weight:600; color:var(--label); }
+.row-sub { font-size:13px; color:var(--gray); margin-top:1px; }
+.row-right { display:flex; flex-direction:column; align-items:flex-end; gap:3px; flex-shrink:0; }
+.row-dist { font-size:12px; color:var(--gray); }
+.row-badge { font-size:11px; font-weight:600; padding:2px 8px; border-radius:20px; }
+.b-green { background:#E8F8EE; color:var(--green); }
+.b-orange { background:#FFF3EC; color:var(--orange); }
+.b-blue { background:#EBF4FF; color:var(--blue); }
+.row-arrow { font-size:14px; color:var(--gray2); margin-left:4px; }
+.hscroll { display:flex; gap:10px; padding:6px 16px 12px; overflow-x:auto; }
+.hscroll::-webkit-scrollbar { display:none; }
+.hcard { width:130px; flex-shrink:0; background:#fff; border-radius:13px; overflow:hidden; box-shadow:0 1px 4px rgba(0,0,0,.06); }
+.hcard-img { height:80px; display:flex; align-items:center; justify-content:center; font-size:32px; }
+.hcard-info { padding:9px 11px; }
+.hcard-name { font-size:13px; font-weight:600; color:var(--label); }
+.hcard-meta { font-size:11px; color:var(--gray); margin-top:2px; display:flex; align-items:center; gap:4px; }
+.live-dot { width:6px; height:6px; border-radius:50%; background:var(--green); display:inline-block; }
 
-  /* Map toggle */
-  .map-toggle {
-    position: absolute;
-    bottom: 10px; left: 12px;
-    background: #007AFF;
-    color: #fff;
-    border-radius: 20px;
-    padding: 5px 12px;
-    font-size: 11px; font-weight: 600;
-    box-shadow: 0 3px 10px rgba(0,122,255,0.4);
-  }
+/* ── SCREEN 2: 行程 ── */
+.s2-header { padding:16px 20px 12px; background:#fff; border-bottom:0.5px solid var(--sep); flex-shrink:0; }
+.screen-title { font-size:28px; font-weight:700; letter-spacing:-.5px; }
+.screen-sub { font-size:15px; color:var(--gray); margin-top:2px; }
+.trip-card { margin:0 16px 14px; border-radius:20px; overflow:hidden; background:#fff; cursor:pointer; box-shadow:0 4px 16px rgba(0,0,0,.1); transition:transform .15s; }
+.trip-card:active { transform:scale(.98); }
+.trip-cover { height:150px; display:flex; align-items:flex-end; padding:16px; position:relative; overflow:hidden; }
+.cov-jp { background:linear-gradient(135deg,#FF6B6B,#FF8E53); }
+.cov-fr { background:linear-gradient(135deg,#8B5CF6,#EC4899); }
+.cov-th { background:linear-gradient(135deg,#10B981,#059669); }
+.cov-ov { position:absolute; inset:0; background:linear-gradient(to top,rgba(0,0,0,.45),transparent); }
+.cov-em { position:relative; z-index:1; font-size:44px; }
+.cov-badge { position:absolute; top:12px; right:12px; z-index:2; backdrop-filter:blur(8px); border-radius:20px; padding:4px 12px; font-size:12px; font-weight:600; color:#fff; }
+.badge-go { background:rgba(52,199,89,.85); }
+.badge-pl { background:rgba(0,122,255,.8); }
+.badge-pa { background:rgba(0,0,0,.45); }
+.trip-info { padding:12px 14px; }
+.trip-name { font-size:17px; font-weight:700; }
+.trip-date { font-size:13px; color:var(--gray); margin-top:2px; }
+.trip-stats { display:flex; gap:12px; margin-top:10px; padding-top:10px; border-top:0.5px solid #F2F2F7; align-items:center; }
+.tstat { font-size:12px; color:var(--gray); }
+.tstat strong { color:var(--label); font-weight:600; }
+.avatars { display:flex; margin-left:auto; }
+.av { width:22px; height:22px; border-radius:50%; border:2px solid #fff; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:#fff; margin-left:-6px; }
+.av:first-child { margin-left:0; }
+.new-trip { margin:0 16px 16px; padding:16px; border:2px dashed #D1D1D6; border-radius:20px; display:flex; align-items:center; justify-content:center; gap:8px; color:var(--blue); font-size:15px; font-weight:600; cursor:pointer; background:#F5F5F7; }
 
-  /* Map FABs */
-  .map-fabs {
-    position: absolute;
-    bottom: 10px; right: 12px;
-    display: flex; gap: 8px;
-  }
-  .map-fab {
-    width: 34px; height: 34px;
-    background: #fff;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-  }
+/* ── SCREEN 3: 行程詳細 ── */
+.s3-wrap { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.s3-header { background:linear-gradient(135deg,#FF6B6B,#FF8E53); padding:12px 16px; flex-shrink:0; }
+.s3-back { width:30px; height:30px; border-radius:50%; background:rgba(255,255,255,.25); display:flex; align-items:center; justify-content:center; font-size:16px; color:#fff; cursor:pointer; margin-bottom:6px; }
+.s3-title { font-size:19px; font-weight:700; color:#fff; }
+.s3-sub { font-size:12px; color:rgba(255,255,255,.85); margin-top:2px; }
+.day-tabs { display:flex; gap:6px; padding:10px 14px 8px; overflow-x:auto; flex-shrink:0; background:#fff; border-bottom:0.5px solid var(--sep); }
+.day-tabs::-webkit-scrollbar { display:none; }
+.day-tab { display:flex; flex-direction:column; align-items:center; padding:7px 12px; border-radius:12px; flex-shrink:0; background:var(--gray6); cursor:pointer; min-width:54px; }
+.day-tab.active { background:var(--label); }
+.day-tab .dn { font-size:16px; font-weight:700; color:var(--label); }
+.day-tab.active .dn { color:#fff; }
+.day-tab .dl { font-size:9px; color:var(--gray); }
+.day-tab.active .dl { color:rgba(255,255,255,.65); }
+.s3-resizable { flex:1; display:flex; flex-direction:column; overflow:hidden; }
+.s3-map { flex-shrink:0; position:relative; background:#EEF2F5; overflow:hidden; height:180px; min-height:80px; max-height:380px; }
+.map-inner { width:100%; height:100%; background:linear-gradient(#E8F4FD 1px,transparent 1px),linear-gradient(90deg,#E8F4FD 1px,transparent 1px),#EEF2F5; background-size:36px 36px; position:relative; }
+.bl { position:absolute; background:#F5F0E8; border:1px solid #E0D8CC; border-radius:3px; }
+.pk { position:absolute; background:#C8E6C9; border-radius:6px; }
+.wt { position:absolute; background:#B3D9F7; }
+.rd { position:absolute; background:#fff; }
+.rd.h { height:7px; width:100%; } .rd.v { width:7px; height:100%; }
+.pin { position:absolute; display:flex; flex-direction:column; align-items:center; z-index:5; }
+.pin-c { width:26px; height:26px; border-radius:50% 50% 50% 0; transform:rotate(-45deg); display:flex; align-items:center; justify-content:center; box-shadow:0 3px 8px rgba(0,0,0,.25); }
+.pin-n { transform:rotate(45deg); font-size:11px; font-weight:700; color:#fff; }
+.pin-l { margin-top:2px; background:#fff; border-radius:7px; padding:2px 6px; font-size:9px; font-weight:600; white-space:nowrap; box-shadow:0 2px 6px rgba(0,0,0,.12); }
+.map-badge { position:absolute; bottom:10px; left:12px; background:var(--blue); color:#fff; border-radius:16px; padding:4px 10px; font-size:10px; font-weight:600; }
+.s3-scroll { flex:1; overflow-y:auto; background:var(--gray6); }
+.s3-scroll::-webkit-scrollbar { display:none; }
+.weather { display:flex; align-items:center; gap:10px; padding:9px 16px; background:#fff; border-bottom:0.5px solid #F2F2F7; }
+.w-t { font-size:17px; font-weight:700; }
+.w-d { font-size:11px; color:var(--gray); }
+.w-ex { margin-left:auto; font-size:11px; color:var(--gray); display:flex; gap:8px; }
+.timeline { padding:10px 14px 80px; }
+.tl-row { display:flex; gap:10px; }
+.tl-l { display:flex; flex-direction:column; align-items:center; width:34px; flex-shrink:0; padding-top:2px; }
+.tl-t { font-size:10px; font-weight:600; color:var(--gray); margin-bottom:4px; }
+.tl-d { width:13px; height:13px; border-radius:50%; border:2px solid #fff; flex-shrink:0; }
+.tl-d.sp { background:var(--blue); box-shadow:0 0 0 2px var(--blue); }
+.tl-d.fd { background:var(--orange); box-shadow:0 0 0 2px var(--orange); }
+.tl-d.ht { background:var(--purple); box-shadow:0 0 0 2px var(--purple); }
+.tl-d.mv { background:var(--gray2); box-shadow:0 0 0 2px var(--gray2); }
+.tl-li { width:2px; background:#E5E5EA; flex:1; margin:2px 0; min-height:14px; }
+.tl-li.da { background:repeating-linear-gradient(to bottom,var(--gray2) 0,var(--gray2) 4px,transparent 4px,transparent 8px); }
+.tl-card { flex:1; background:#fff; border-radius:14px; padding:11px 13px; margin-bottom:8px; box-shadow:0 1px 4px rgba(0,0,0,.06); cursor:pointer; }
+.tl-card:active { transform:scale(.98); }
+.tl-top { display:flex; justify-content:space-between; align-items:flex-start; }
+.tl-name { font-size:14px; font-weight:600; display:flex; align-items:center; gap:5px; }
+.tl-dur { font-size:11px; color:var(--gray); }
+.tl-meta { font-size:11px; color:var(--gray); margin-top:2px; }
+.tl-acts { display:flex; gap:5px; margin-top:7px; flex-wrap:wrap; }
+.tl-a { font-size:11px; font-weight:500; color:var(--blue); background:#EBF4FF; padding:3px 8px; border-radius:6px; }
+.nb { width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#fff; flex-shrink:0; }
+.tl-tr { flex:1; background:var(--gray6); border-radius:10px; padding:7px 11px; margin-bottom:8px; display:flex; align-items:center; gap:7px; font-size:11px; color:var(--gray); }
+.tl-tr strong { color:#3C3C43; font-weight:600; }
 
-  /* ── Scroll Area ── */
-  .scroll-area {
-    flex: 1;
-    overflow-y: auto;
-    background: #F5F5F7;
-  }
-  .scroll-area::-webkit-scrollbar { display: none; }
+/* ── SCREEN 4: 探索 ── */
+.s4-bar { display:flex; align-items:center; padding:16px 20px 10px; background:#fff; border-bottom:0.5px solid var(--sep); flex-shrink:0; }
+.s4-search { flex:1; display:flex; align-items:center; gap:8px; background:var(--gray6); border-radius:10px; padding:8px 12px; }
+.sec-hd { display:flex; justify-content:space-between; align-items:center; padding:14px 20px 8px; }
+.sec-title { font-size:17px; font-weight:700; }
+.sec-more { font-size:14px; color:var(--blue); font-weight:500; }
+.dest-row { display:flex; gap:12px; padding:0 16px 16px; overflow-x:auto; }
+.dest-row::-webkit-scrollbar { display:none; }
+.dest-card { width:140px; flex-shrink:0; border-radius:18px; overflow:hidden; background:var(--label); box-shadow:0 4px 16px rgba(0,0,0,.12); cursor:pointer; }
+.dest-card:active { transform:scale(.95); }
+.dest-img { height:100px; display:flex; align-items:center; justify-content:center; font-size:48px; }
+.d-jp { background:linear-gradient(135deg,#FF6B6B,#FF8E53); }
+.d-fr { background:linear-gradient(135deg,#8B5CF6,#EC4899); }
+.d-ba { background:linear-gradient(135deg,#10B981,#059669); }
+.d-sg { background:linear-gradient(135deg,#3B82F6,#1D4ED8); }
+.dest-info { padding:10px 12px; background:#fff; }
+.dest-name { font-size:14px; font-weight:700; }
+.dest-meta { font-size:12px; color:var(--gray); margin-top:2px; }
+.comm-card { margin:0 16px 12px; background:#fff; border-radius:18px; overflow:hidden; box-shadow:0 2px 8px rgba(0,0,0,.07); cursor:pointer; }
+.comm-card:active { transform:scale(.98); }
+.comm-img { height:130px; display:flex; align-items:center; justify-content:center; font-size:52px; position:relative; }
+.comm-ov { position:absolute; inset:0; background:linear-gradient(to top,rgba(0,0,0,.4),transparent); }
+.comm-body { padding:12px 14px; }
+.comm-title { font-size:15px; font-weight:600; }
+.comm-meta { font-size:13px; color:var(--gray); margin-top:3px; }
+.comm-foot { display:flex; align-items:center; margin-top:8px; }
+.comm-author { font-size:12px; color:var(--gray); }
+.comm-likes { font-size:12px; color:var(--gray); margin-left:auto; }
 
-  /* Weather strip */
-  .weather-strip {
-    display: flex; align-items: center; gap: 10px;
-    padding: 10px 16px;
-    background: #fff;
-    border-bottom: 1px solid #F2F2F7;
-  }
-  .weather-strip .icon { font-size: 22px; }
-  .weather-strip .temp { font-size: 18px; font-weight: 700; color: #1D1D1F; }
-  .weather-strip .desc { font-size: 12px; color: #86868B; }
-  .weather-strip .extra {
-    margin-left: auto;
-    display: flex; gap: 10px;
-    font-size: 12px; color: #86868B;
-  }
-
-  /* Timeline */
-  .timeline { padding: 12px 16px 80px; }
-  .tl-row { display: flex; gap: 10px; }
-  .tl-left {
-    display: flex; flex-direction: column; align-items: center;
-    width: 36px; flex-shrink: 0; padding-top: 2px;
-  }
-  .tl-time { font-size: 10px; font-weight: 600; color: #86868B; margin-bottom: 5px; }
-  .tl-dot {
-    width: 14px; height: 14px; border-radius: 50%;
-    border: 2.5px solid #fff;
-    flex-shrink: 0;
-    position: relative; z-index: 1;
-  }
-  .tl-dot.spot { background: #007AFF; box-shadow: 0 0 0 2px #007AFF; }
-  .tl-dot.food { background: #FF6B35; box-shadow: 0 0 0 2px #FF6B35; }
-  .tl-dot.hotel { background: #5856D6; box-shadow: 0 0 0 2px #5856D6; }
-  .tl-dot.move { background: #86868B; box-shadow: 0 0 0 2px #86868B; }
-  .tl-line {
-    width: 2px; background: #E5E5EA;
-    flex: 1; margin: 2px 0;
-    min-height: 16px;
-  }
-  .tl-line.dashed {
-    background: repeating-linear-gradient(to bottom, #C7C7CC 0px, #C7C7CC 4px, transparent 4px, transparent 8px);
-  }
-  .tl-card {
-    flex: 1;
-    background: #fff;
-    border-radius: 16px;
-    padding: 12px 14px;
-    margin-bottom: 10px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
-  }
-  .tl-card-top { display: flex; justify-content: space-between; align-items: flex-start; }
-  .tl-card-name { font-size: 14px; font-weight: 600; color: #1D1D1F; }
-  .tl-card-dur { font-size: 12px; color: #86868B; }
-  .tl-card-meta { font-size: 12px; color: #86868B; margin-top: 3px; }
-  .tl-card-actions { display: flex; gap: 6px; margin-top: 8px; flex-wrap: wrap; }
-  .tl-action {
-    font-size: 11px; font-weight: 500; color: #007AFF;
-    background: #EBF4FF; padding: 3px 9px; border-radius: 7px;
-  }
-  /* Transit card */
-  .tl-transit {
-    flex: 1;
-    background: #F5F5F7;
-    border-radius: 12px;
-    padding: 8px 12px;
-    margin-bottom: 10px;
-    display: flex; align-items: center; gap: 8px;
-  }
-  .tl-transit span { font-size: 12px; color: #86868B; }
-  .tl-transit strong { font-size: 12px; font-weight: 600; color: #3C3C43; }
-  /* Numbered badge on card */
-  .num-badge {
-    width: 20px; height: 20px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700; color: #fff;
-    flex-shrink: 0; margin-right: 2px;
-  }
-
-  /* Add btn */
-  .add-btn {
-    position: fixed;
-    bottom: 72px; right: 20px;
-    width: 50px; height: 50px;
-    background: #007AFF;
-    border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 26px; color: #fff;
-    box-shadow: 0 4px 16px rgba(0,122,255,0.4);
-  }
-
-  /* Bottom Nav */
-  .bottom-nav {
-    display: flex;
-    background: rgba(255,255,255,0.92);
-    backdrop-filter: blur(20px);
-    border-top: 1px solid #E5E5EA;
-    padding: 8px 0 20px;
-    flex-shrink: 0;
-  }
-  .nav-item {
-    flex: 1; display: flex; flex-direction: column; align-items: center;
-    gap: 2px; cursor: pointer;
-  }
-  .nav-item svg { width: 22px; height: 22px; }
-  .nav-item span { font-size: 10px; font-weight: 500; color: #8E8E93; }
+/* ── SCREEN 5: 我的 ── */
+.profile-hero { background:linear-gradient(135deg,#1D1D1F,#3A3A3C); padding:28px 20px 20px; display:flex; flex-direction:column; align-items:center; flex-shrink:0; }
+.p-av { width:72px; height:72px; border-radius:50%; background:linear-gradient(135deg,var(--blue),var(--purple)); display:flex; align-items:center; justify-content:center; font-size:32px; color:#fff; margin-bottom:10px; border:3px solid rgba(255,255,255,.2); }
+.p-name { font-size:20px; font-weight:700; color:#fff; }
+.p-sub { font-size:13px; color:rgba(255,255,255,.6); margin-top:3px; }
+.p-stats { display:flex; gap:24px; margin-top:16px; }
+.pst { display:flex; flex-direction:column; align-items:center; gap:2px; }
+.pst-n { font-size:22px; font-weight:700; color:#fff; }
+.pst-l { font-size:12px; color:rgba(255,255,255,.55); }
+.stt-group { margin:12px 16px 0; background:#fff; border-radius:13px; overflow:hidden; }
+.stt-row { display:flex; align-items:center; gap:12px; padding:13px 14px; border-bottom:0.5px solid #F2F2F7; cursor:pointer; }
+.stt-row:last-child { border-bottom:none; }
+.stt-row:active { background:var(--gray6); }
+.stt-icon { width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0; }
+.stt-label { flex:1; font-size:15px; }
+.stt-val { font-size:14px; color:var(--gray); }
+.stt-arrow { font-size:14px; color:var(--gray2); }
 </style>
 </head>
 <body>
-<div class="phone">
-  <div class="status-bar"><span>9:41</span><span>100%</span></div>
+<div class="app">
 
-  <!-- Header -->
-  <div class="header">
-    <div class="back-btn">←</div>
-    <div class="trip-title">🗾 東京 × 大阪 11 日</div>
-    <div class="trip-sub">5月 15日 — 5月 25日 · 5 人同行</div>
-  </div>
-
-  <!-- Day Tabs -->
-  <div class="day-tabs">
-    <div class="day-tab active"><span class="dn">15</span><span class="dl">D1 五</span><span class="dw">⛅22°</span></div>
-    <div class="day-tab"><span class="dn">16</span><span class="dl">D2 六</span><span class="dw">☀️25°</span></div>
-    <div class="day-tab"><span class="dn">17</span><span class="dl">D3 日</span><span class="dw">🌧18°</span></div>
-    <div class="day-tab"><span class="dn">18</span><span class="dl">D4 一</span><span class="dw">⛅21°</span></div>
-    <div class="day-tab"><span class="dn">19</span><span class="dl">D5 二</span><span class="dw">☀️26°</span></div>
-  </div>
-
-  <!-- MAP -->
-  <div class="map-section">
-    <div class="map-bg">
-      <div class="block" style="left:10px;top:20px;width:70px;height:45px"></div>
-      <div class="block" style="left:100px;top:20px;width:55px;height:45px"></div>
-      <div class="block" style="left:175px;top:20px;width:80px;height:45px"></div>
-      <div class="block" style="left:275px;top:20px;width:100px;height:45px"></div>
-      <div class="block" style="left:10px;top:90px;width:60px;height:55px"></div>
-      <div class="block" style="left:175px;top:90px;width:70px;height:55px"></div>
-      <div class="block" style="left:265px;top:90px;width:60px;height:55px"></div>
-      <div class="block" style="left:10px;top:165px;width:80px;height:50px"></div>
-      <div class="block" style="left:175px;top:165px;width:65px;height:50px"></div>
-      <div class="block" style="left:265px;top:165px;width:110px;height:50px"></div>
-      <div class="park" style="left:90px;top:90px;width:75px;height:55px"></div>
-      <div class="water" style="left:0;top:210px;width:100%;height:12px"></div>
-      <div class="road h" style="top:75px"></div>
-      <div class="road h" style="top:152px"></div>
-      <div class="road h main" style="top:108px"></div>
-      <div class="road v" style="left:86px"></div>
-      <div class="road v" style="left:170px"></div>
-      <div class="road v" style="left:258px"></div>
+  <!-- ══ S1: 地圖 ══ -->
+  <div class="screen active" id="s1">
+    <div class="s1-header">
+      <div class="s1-title-row">
+        <div class="s1-title">📍 附近探索</div>
+        <div class="icon-btn">🔔</div>
+        <div class="icon-btn">👤</div>
+      </div>
+      <div class="s1-search">
+        <span>🔍</span>
+        <input placeholder="搜尋景點、美食、住宿...">
+      </div>
+      <div class="segment">
+        <div class="seg-item active" onclick="setSeg(this)">全部</div>
+        <div class="seg-item" onclick="setSeg(this)">景點</div>
+        <div class="seg-item" onclick="setSeg(this)">美食</div>
+        <div class="seg-item" onclick="setSeg(this)">住宿</div>
+      </div>
     </div>
-
-    <!-- Route SVG path -->
-    <svg class="route-svg" viewBox="0 0 390 220">
-      <!-- Animated dashed route line -->
-      <defs>
-        <marker id="arrow" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto">
-          <path d="M0,0 L6,3 L0,6 Z" fill="#007AFF" opacity="0.8"/>
-        </marker>
-      </defs>
-      <polyline
-        points="55,62  155,112  240,175  335,62"
-        fill="none"
-        stroke="#007AFF"
-        stroke-width="2.5"
-        stroke-dasharray="6 4"
-        stroke-linecap="round"
-        opacity="0.8"
-        marker-mid="url(#arrow)"
-      />
-      <!-- Soft glow -->
-      <polyline
-        points="55,62  155,112  240,175  335,62"
-        fill="none"
-        stroke="#007AFF"
-        stroke-width="6"
-        stroke-linecap="round"
-        opacity="0.12"
-      />
-    </svg>
-
-    <!-- Pins -->
-    <div class="pin p1" style="left:40px;top:36px">
-      <div class="pin-circle"><span class="pin-num">1</span></div>
-      <div class="pin-label">成田機場</div>
+    <div class="map-wrap" id="m1">
+      <div class="mb" style="left:10px;top:18px;width:62px;height:40px"></div>
+      <div class="mb" style="left:90px;top:18px;width:52px;height:40px"></div>
+      <div class="mb" style="left:162px;top:18px;width:70px;height:40px"></div>
+      <div class="mb" style="left:252px;top:18px;width:128px;height:40px"></div>
+      <div class="mb" style="left:10px;top:82px;width:52px;height:52px"></div>
+      <div class="mb" style="left:162px;top:82px;width:64px;height:52px"></div>
+      <div class="mb" style="left:248px;top:82px;width:58px;height:52px"></div>
+      <div class="mb" style="left:10px;top:158px;width:72px;height:48px"></div>
+      <div class="mb" style="left:162px;top:158px;width:60px;height:48px"></div>
+      <div class="mb" style="left:248px;top:158px;width:132px;height:48px"></div>
+      <div class="mpk" style="left:82px;top:82px;width:66px;height:52px"></div>
+      <div class="mwt" style="left:0;top:222px;width:100%;height:12px"></div>
+      <div class="mr h" style="top:68px"></div><div class="mr h" style="top:148px"></div>
+      <div class="mr yh" style="top:110px"></div>
+      <div class="mr v" style="left:78px"></div><div class="mr v" style="left:156px"></div><div class="mr v" style="left:242px"></div>
+      <svg class="rsvg" viewBox="0 0 390 260" preserveAspectRatio="none">
+        <polyline points="42,44 128,90 218,158 315,44" fill="none" stroke="#007AFF" stroke-width="2.5" stroke-dasharray="6,4" stroke-linecap="round" opacity=".9"/>
+        <polyline points="42,44 128,90 218,158 315,44" fill="none" stroke="#007AFF" stroke-width="8" stroke-linecap="round" opacity=".1"/>
+        <circle cx="42" cy="44" r="5" fill="#007AFF" stroke="#fff" stroke-width="2"/>
+        <circle cx="128" cy="90" r="5" fill="#FF6B35" stroke="#fff" stroke-width="2"/>
+        <circle cx="218" cy="158" r="5" fill="#34C759" stroke="#fff" stroke-width="2"/>
+        <circle cx="315" cy="44" r="5" fill="#5856D6" stroke="#fff" stroke-width="2"/>
+      </svg>
+      <div class="mpin" style="left:22px;top:14px"><div class="mpin-outer" style="background:#007AFF"><span style="color:#fff;font-size:12px;font-weight:700">1</span></div><div class="mpin-label sel">台北 101</div></div>
+      <div class="mpin" style="left:107px;top:60px"><div class="mpin-outer" style="background:#FF6B35"><span style="color:#fff;font-size:12px;font-weight:700">2</span></div><div class="mpin-label">鼎泰豐</div></div>
+      <div class="mpin" style="left:196px;top:128px"><div class="mpin-outer" style="background:#34C759"><span style="color:#fff;font-size:12px;font-weight:700">3</span></div><div class="mpin-label">大安公園</div></div>
+      <div class="mpin" style="left:295px;top:14px"><div class="mpin-outer" style="background:#5856D6"><span style="color:#fff;font-size:12px;font-weight:700">4</span></div><div class="mpin-label">龍山寺</div></div>
+      <div class="udot" style="left:174px;top:126px"></div>
+      <div class="map-status"><div class="mpill"><div class="dot" style="background:#34C759"></div>定位中</div><div class="mpill">附近 12 個</div></div>
+      <div class="map-fabs"><div class="mfab">＋</div><div class="mfab">📍</div></div>
     </div>
-    <div class="pin p2" style="left:132px;top:86px">
-      <div class="pin-circle"><span class="pin-num">2</span></div>
-      <div class="pin-label">一蘭拉麵</div>
-    </div>
-    <div class="pin p3" style="left:218px;top:148px">
-      <div class="pin-circle"><span class="pin-num">3</span></div>
-      <div class="pin-label">淺草寺</div>
-    </div>
-    <div class="pin p4" style="left:316px;top:36px">
-      <div class="pin-circle"><span class="pin-num">4</span></div>
-      <div class="pin-label">新宿飯店</div>
-    </div>
-
-    <!-- Legend -->
-    <div class="map-legend">
-      <div class="legend-item"><div class="legend-dot" style="background:#007AFF"></div>景點</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#FF6B35"></div>美食</div>
-      <div class="legend-item"><div class="legend-dot" style="background:#5856D6"></div>住宿</div>
-    </div>
-
-    <div class="map-toggle">📍 路徑模式</div>
-    <div class="map-fabs">
-      <div class="map-fab">🔍</div>
-      <div class="map-fab">📐</div>
-    </div>
-  </div>
-
-  <!-- Weather -->
-  <div class="weather-strip">
-    <span class="icon">⛅</span>
-    <div><div class="temp">22°C</div><div class="desc">多雲 · 東京都</div></div>
-    <div class="extra"><span>💧 68%</span><span>💨 12km/h</span></div>
-  </div>
-
-  <!-- Timeline -->
-  <div class="scroll-area">
-    <div class="timeline">
-
-      <!-- Item 1 -->
-      <div class="tl-row">
-        <div class="tl-left">
-          <div class="tl-time">09:00</div>
-          <div class="tl-dot spot"></div>
-          <div class="tl-line"></div>
+    <div class="drag-handle" id="dh1"><div class="dbar"></div></div>
+    <div class="s1-content">
+      <div class="s-head"><span class="s-title">📋 進行中行程</span><span class="s-more">查看全部</span></div>
+      <div class="group">
+        <div class="row" onclick="go(2)">
+          <div class="row-icon" style="background:linear-gradient(135deg,#FF6B6B,#FF8E53)">🗾</div>
+          <div class="row-main"><div class="row-name">東京 × 大阪 11 日</div><div class="row-sub">D3 · 今天 · 4 個行程待完成</div></div>
+          <div class="row-right"><div class="row-badge b-blue">進行中</div></div>
+          <div class="row-arrow">›</div>
         </div>
-        <div class="tl-card">
-          <div class="tl-card-top">
-            <div style="display:flex;align-items:center;gap:6px">
-              <div class="num-badge" style="background:#007AFF">1</div>
-              <div class="tl-card-name">🛬 成田機場抵達</div>
+      </div>
+      <div class="s-head"><span class="s-title">📍 附近景點</span><span class="s-more">地圖</span></div>
+      <div class="hscroll">
+        <div class="hcard"><div class="hcard-img" style="background:linear-gradient(135deg,#E3F2FD,#BBDEFB)">🏛</div><div class="hcard-info"><div class="hcard-name">龍山寺</div><div class="hcard-meta"><span class="live-dot"></span>0.3 km · 免費</div></div></div>
+        <div class="hcard"><div class="hcard-img" style="background:linear-gradient(135deg,#E8F5E9,#C8E6C9)">🌿</div><div class="hcard-info"><div class="hcard-name">大安公園</div><div class="hcard-meta"><span class="live-dot"></span>0.8 km · 免費</div></div></div>
+        <div class="hcard"><div class="hcard-img" style="background:linear-gradient(135deg,#FFF3E0,#FFE0B2)">🍜</div><div class="hcard-info"><div class="hcard-name">鼎泰豐</div><div class="hcard-meta">0.4 km · $$</div></div></div>
+        <div class="hcard"><div class="hcard-img" style="background:linear-gradient(135deg,#EDE7F6,#D1C4E9)">🗼</div><div class="hcard-info"><div class="hcard-name">台北 101</div><div class="hcard-meta">1.2 km · $$$</div></div></div>
+      </div>
+      <div class="s-head"><span class="s-title">⭐ 熱門推薦</span><span class="s-more">更多</span></div>
+      <div class="group">
+        <div class="row"><div class="row-icon" style="background:#FFF3EC">🍜</div><div class="row-main"><div class="row-name">鼎泰豐 信義店</div><div class="row-sub">中式料理 · ★ 4.9</div></div><div class="row-right"><div class="row-dist">0.4 km</div><div class="row-badge b-orange">等候 45 分</div></div><div class="row-arrow">›</div></div>
+        <div class="row"><div class="row-icon" style="background:#E8F5E9">🌿</div><div class="row-main"><div class="row-name">大安森林公園</div><div class="row-sub">自然景觀 · ★ 4.7</div></div><div class="row-right"><div class="row-dist">0.8 km</div><div class="row-badge b-green">開放中</div></div><div class="row-arrow">›</div></div>
+        <div class="row"><div class="row-icon" style="background:#EBF4FF">🏛</div><div class="row-main"><div class="row-name">龍山寺</div><div class="row-sub">文化古蹟 · ★ 4.8</div></div><div class="row-right"><div class="row-dist">0.3 km</div><div class="row-badge b-green">開放中</div></div><div class="row-arrow">›</div></div>
+        <div class="row"><div class="row-icon" style="background:#F3E8FF">☕</div><div class="row-main"><div class="row-name">路易莎咖啡</div><div class="row-sub">咖啡輕食 · ★ 4.5</div></div><div class="row-right"><div class="row-dist">0.2 km</div><div class="row-badge b-green">營業中</div></div><div class="row-arrow">›</div></div>
+      </div>
+      <div style="height:12px"></div>
+    </div>
+  </div>
+
+  <!-- ══ S2: 我的行程 ══ -->
+  <div class="screen" id="s2">
+    <div class="s2-header"><div class="screen-title">我的行程</div><div class="screen-sub">3 個旅程</div></div>
+    <div class="s2-content">
+      <div style="height:12px"></div>
+      <div class="trip-card" onclick="go(3)">
+        <div class="trip-cover cov-jp"><div class="cov-ov"></div><div class="cov-em">🗾</div><div class="cov-badge badge-go">進行中</div></div>
+        <div class="trip-info"><div class="trip-name">東京 × 大阪 11 日</div><div class="trip-date">5月 15日 — 5月 25日</div>
+          <div class="trip-stats"><span class="tstat">📅 <strong>11 天</strong></span><span class="tstat">📍 <strong>28 景點</strong></span>
+            <div class="avatars"><div class="av" style="background:#007AFF">我</div><div class="av" style="background:#FF6B35">A</div><div class="av" style="background:#34C759">B</div><div class="av" style="background:#FF9F0A">+2</div></div></div></div>
+      </div>
+      <div class="trip-card">
+        <div class="trip-cover cov-fr"><div class="cov-ov"></div><div class="cov-em">🗼</div><div class="cov-badge badge-pl">計劃中</div></div>
+        <div class="trip-info"><div class="trip-name">巴黎 × 南法 8 日</div><div class="trip-date">7月 10日 — 7月 18日</div>
+          <div class="trip-stats"><span class="tstat">📅 <strong>8 天</strong></span><span class="tstat">📍 <strong>15 景點</strong></span>
+            <div class="avatars"><div class="av" style="background:#007AFF">我</div><div class="av" style="background:#FF6B35">C</div></div></div></div>
+      </div>
+      <div class="trip-card">
+        <div class="trip-cover cov-th"><div class="cov-ov"></div><div class="cov-em">🌿</div><div class="cov-badge badge-pa">已結束</div></div>
+        <div class="trip-info"><div class="trip-name">清邁深度 5 日</div><div class="trip-date">3月 1日 — 3月 5日</div>
+          <div class="trip-stats"><span class="tstat">📅 <strong>5 天</strong></span><span class="tstat">📍 <strong>12 景點</strong></span>
+            <div class="avatars"><div class="av" style="background:#007AFF">我</div></div></div></div>
+      </div>
+      <div class="new-trip">＋ 新建行程</div>
+      <div style="height:12px"></div>
+    </div>
+  </div>
+
+  <!-- ══ S3: 行程詳細 ══ -->
+  <div class="screen" id="s3">
+    <div class="s3-wrap">
+      <div class="s3-header">
+        <div class="s3-back" onclick="go(2)">←</div>
+        <div class="s3-title">🗾 東京 × 大阪 11 日</div>
+        <div class="s3-sub">5月 15日 — 5月 25日 · 5 人同行</div>
+      </div>
+      <div class="day-tabs">
+        <div class="day-tab active" onclick="setDay(this)"><span class="dn">15</span><span class="dl">D1 ⛅22°</span></div>
+        <div class="day-tab" onclick="setDay(this)"><span class="dn">16</span><span class="dl">D2 ☀️25°</span></div>
+        <div class="day-tab" onclick="setDay(this)"><span class="dn">17</span><span class="dl">D3 🌧18°</span></div>
+        <div class="day-tab" onclick="setDay(this)"><span class="dn">18</span><span class="dl">D4 ⛅21°</span></div>
+        <div class="day-tab" onclick="setDay(this)"><span class="dn">19</span><span class="dl">D5 ☀️26°</span></div>
+      </div>
+      <div class="s3-resizable">
+        <div class="s3-map" id="m3">
+          <div class="map-inner">
+            <div class="bl" style="left:10px;top:20px;width:65px;height:40px"></div>
+            <div class="bl" style="left:95px;top:20px;width:55px;height:40px"></div>
+            <div class="bl" style="left:170px;top:20px;width:75px;height:40px"></div>
+            <div class="bl" style="left:265px;top:20px;width:110px;height:40px"></div>
+            <div class="bl" style="left:10px;top:85px;width:55px;height:50px"></div>
+            <div class="bl" style="left:170px;top:85px;width:65px;height:50px"></div>
+            <div class="bl" style="left:255px;top:85px;width:55px;height:50px"></div>
+            <div class="pk" style="left:84px;top:85px;width:70px;height:50px"></div>
+            <div class="wt" style="left:0;bottom:0;width:100%;height:10px"></div>
+            <div class="rd h" style="top:70px"></div><div class="rd h" style="top:145px"></div>
+            <div class="rd v" style="left:82px"></div><div class="rd v" style="left:163px"></div><div class="rd v" style="left:252px"></div>
+          </div>
+          <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none" viewBox="0 0 390 220" preserveAspectRatio="none">
+            <polyline points="45,55 148,100 228,160 328,50" fill="none" stroke="#007AFF" stroke-width="2.5" stroke-dasharray="6 4" stroke-linecap="round" opacity=".85"/>
+            <polyline points="45,55 148,100 228,160 328,50" fill="none" stroke="#007AFF" stroke-width="8" stroke-linecap="round" opacity=".1"/>
+          </svg>
+          <div class="pin" style="left:30px;top:28px"><div class="pin-c" style="background:#007AFF"><span class="pin-n">1</span></div><div class="pin-l">成田機場</div></div>
+          <div class="pin" style="left:128px;top:72px"><div class="pin-c" style="background:#FF6B35"><span class="pin-n">2</span></div><div class="pin-l">一蘭拉麵</div></div>
+          <div class="pin" style="left:208px;top:130px"><div class="pin-c" style="background:#34C759"><span class="pin-n">3</span></div><div class="pin-l">淺草寺</div></div>
+          <div class="pin" style="left:310px;top:24px"><div class="pin-c" style="background:#5856D6"><span class="pin-n">4</span></div><div class="pin-l">新宿飯店</div></div>
+          <div class="map-badge">📍 路徑模式</div>
+        </div>
+        <div class="drag-handle" id="dh3"><div class="dbar"></div></div>
+        <div class="s3-scroll">
+          <div class="weather"><span style="font-size:20px">⛅</span><div><div class="w-t">22°C</div><div class="w-d">多雲 · 東京都</div></div><div class="w-ex"><span>💧68%</span><span>💨12km/h</span></div></div>
+          <div class="timeline">
+            <div class="tl-row">
+              <div class="tl-l"><div class="tl-t">09:00</div><div class="tl-d sp"></div><div class="tl-li"></div></div>
+              <div class="tl-card"><div class="tl-top"><div class="tl-name"><div class="nb" style="background:#007AFF">1</div>🛬 成田機場抵達</div><div class="tl-dur">60 分</div></div><div class="tl-meta">入境 · 換 Suica · 領行李</div><div class="tl-acts"><span class="tl-a">🗺 地圖</span><span class="tl-a">📝 備註</span></div></div>
             </div>
-            <div class="tl-card-dur">60 分鐘</div>
-          </div>
-          <div class="tl-card-meta">入境 · 換 Suica · 領行李</div>
-          <div class="tl-card-actions">
-            <span class="tl-action">🗺 地圖</span>
-            <span class="tl-action">📝 備註</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Transit -->
-      <div class="tl-row">
-        <div class="tl-left">
-          <div class="tl-time"></div>
-          <div class="tl-dot move"></div>
-          <div class="tl-line dashed"></div>
-        </div>
-        <div class="tl-transit">
-          <span>🚆</span>
-          <span>成田 Express <strong>50 分鐘</strong> · ¥3,070</span>
-        </div>
-      </div>
-
-      <!-- Item 2 -->
-      <div class="tl-row">
-        <div class="tl-left">
-          <div class="tl-time">12:00</div>
-          <div class="tl-dot food"></div>
-          <div class="tl-line"></div>
-        </div>
-        <div class="tl-card">
-          <div class="tl-card-top">
-            <div style="display:flex;align-items:center;gap:6px">
-              <div class="num-badge" style="background:#FF6B35">2</div>
-              <div class="tl-card-name">🍜 一蘭拉麵 銀座店</div>
+            <div class="tl-row"><div class="tl-l"><div class="tl-t"></div><div class="tl-d mv"></div><div class="tl-li da"></div></div><div class="tl-tr">🚆 成田 Express <strong>50 分鐘 · ¥3,070</strong></div></div>
+            <div class="tl-row">
+              <div class="tl-l"><div class="tl-t">12:00</div><div class="tl-d fd"></div><div class="tl-li"></div></div>
+              <div class="tl-card"><div class="tl-top"><div class="tl-name"><div class="nb" style="background:#FF6B35">2</div>🍜 一蘭拉麵 銀座</div><div class="tl-dur">60 分</div></div><div class="tl-meta">美食 · ¥1,200 / 人</div><div class="tl-acts"><span class="tl-a">🗺 導航</span><span class="tl-a">💰 記帳</span></div></div>
             </div>
-            <div class="tl-card-dur">60 分鐘</div>
-          </div>
-          <div class="tl-card-meta">美食 · ¥1,200 / 人</div>
-          <div class="tl-card-actions">
-            <span class="tl-action">🗺 導航</span>
-            <span class="tl-action">📋 訂位</span>
-            <span class="tl-action">💰 記帳</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Transit -->
-      <div class="tl-row">
-        <div class="tl-left">
-          <div class="tl-time"></div>
-          <div class="tl-dot move"></div>
-          <div class="tl-line dashed"></div>
-        </div>
-        <div class="tl-transit">
-          <span>🚇</span>
-          <span>地鐵銀座線 <strong>18 分鐘</strong> · ¥200</span>
-        </div>
-      </div>
-
-      <!-- Item 3 -->
-      <div class="tl-row">
-        <div class="tl-left">
-          <div class="tl-time">14:00</div>
-          <div class="tl-dot spot"></div>
-          <div class="tl-line"></div>
-        </div>
-        <div class="tl-card">
-          <div class="tl-card-top">
-            <div style="display:flex;align-items:center;gap:6px">
-              <div class="num-badge" style="background:#34C759">3</div>
-              <div class="tl-card-name">🏛 淺草寺 · 仲見世通</div>
+            <div class="tl-row"><div class="tl-l"><div class="tl-t"></div><div class="tl-d mv"></div><div class="tl-li da"></div></div><div class="tl-tr">🚇 銀座線 <strong>18 分鐘 · ¥200</strong></div></div>
+            <div class="tl-row">
+              <div class="tl-l"><div class="tl-t">14:00</div><div class="tl-d sp"></div><div class="tl-li"></div></div>
+              <div class="tl-card"><div class="tl-top"><div class="tl-name"><div class="nb" style="background:#34C759">3</div>🏛 淺草寺 · 仲見世通</div><div class="tl-dur">120 分</div></div><div class="tl-meta">景點 · 免費 · 台東區</div><div class="tl-acts"><span class="tl-a">🗺 地圖</span><span class="tl-a">📸 相片</span></div></div>
             </div>
-            <div class="tl-card-dur">120 分鐘</div>
-          </div>
-          <div class="tl-card-meta">景點 · 免費 · 台東區</div>
-          <div class="tl-card-actions">
-            <span class="tl-action">🗺 地圖</span>
-            <span class="tl-action">📸 相片</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Transit -->
-      <div class="tl-row">
-        <div class="tl-left">
-          <div class="tl-time"></div>
-          <div class="tl-dot move"></div>
-          <div class="tl-line dashed"></div>
-        </div>
-        <div class="tl-transit">
-          <span>🚇</span>
-          <span>地鐵大江戶線 <strong>22 分鐘</strong> · ¥220</span>
-        </div>
-      </div>
-
-      <!-- Item 4 -->
-      <div class="tl-row">
-        <div class="tl-left">
-          <div class="tl-time">20:00</div>
-          <div class="tl-dot hotel"></div>
-        </div>
-        <div class="tl-card">
-          <div class="tl-card-top">
-            <div style="display:flex;align-items:center;gap:6px">
-              <div class="num-badge" style="background:#5856D6">4</div>
-              <div class="tl-card-name">🏨 新宿 Prince Hotel</div>
+            <div class="tl-row"><div class="tl-l"><div class="tl-t"></div><div class="tl-d mv"></div><div class="tl-li da"></div></div><div class="tl-tr">🚇 大江戶線 <strong>22 分鐘 · ¥220</strong></div></div>
+            <div class="tl-row">
+              <div class="tl-l"><div class="tl-t">20:00</div><div class="tl-d ht"></div></div>
+              <div class="tl-card"><div class="tl-top"><div class="tl-name"><div class="nb" style="background:#5856D6">4</div>🏨 新宿 Prince Hotel</div><div class="tl-dur">入住</div></div><div class="tl-meta">住宿 · ¥12,000 / 晚</div><div class="tl-acts"><span class="tl-a">🗺 導航</span><span class="tl-a">📋 訂單</span></div></div>
             </div>
-            <div class="tl-card-dur">入住</div>
-          </div>
-          <div class="tl-card-meta">住宿 · ¥12,000 / 晚</div>
-          <div class="tl-card-actions">
-            <span class="tl-action">🗺 導航</span>
-            <span class="tl-action">📋 確認訂單</span>
           </div>
         </div>
       </div>
-
     </div>
   </div>
 
-  <!-- Bottom Nav -->
-  <div class="bottom-nav">
-    <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#8E8E93"/></svg><span>地圖</span></div>
-    <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z" fill="#007AFF"/></svg><span style="color:#007AFF">行程</span></div>
-    <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="#8E8E93"/></svg><span>探索</span></div>
-    <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M17 3H7c-1.1 0-1.99.9-1.99 2L5 21l7-3 7 3V5c0-1.1-.9-2-2-2z" fill="#8E8E93"/></svg><span>收藏</span></div>
-    <div class="nav-item"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#8E8E93"/></svg><span>我的</span></div>
+  <!-- ══ S4: 探索 ══ -->
+  <div class="screen" id="s4">
+    <div class="s4-bar"><div class="screen-title" style="font-size:24px">探索</div></div>
+    <div class="s4-content">
+      <div style="padding:10px 16px"><div class="s4-search"><span>🔍</span><span style="font-size:15px;color:#8E8E93">搜尋目的地、行程...</span></div></div>
+      <div class="sec-hd"><span class="sec-title">🔥 熱門目的地</span><span class="sec-more">更多</span></div>
+      <div class="dest-row">
+        <div class="dest-card"><div class="dest-img d-jp">🗾</div><div class="dest-info"><div class="dest-name">東京</div><div class="dest-meta">42 個行程</div></div></div>
+        <div class="dest-card"><div class="dest-img d-fr">🗼</div><div class="dest-info"><div class="dest-name">巴黎</div><div class="dest-meta">28 個行程</div></div></div>
+        <div class="dest-card"><div class="dest-img d-ba">🌴</div><div class="dest-info"><div class="dest-name">峇里島</div><div class="dest-meta">35 個行程</div></div></div>
+        <div class="dest-card"><div class="dest-img d-sg">🦁</div><div class="dest-info"><div class="dest-name">新加坡</div><div class="dest-meta">19 個行程</div></div></div>
+      </div>
+      <div class="sec-hd"><span class="sec-title">✨ 社群精選</span><span class="sec-more">更多</span></div>
+      <div class="comm-card">
+        <div class="comm-img d-jp"><div class="comm-ov"></div><span style="position:relative;z-index:1">🍜</span></div>
+        <div class="comm-body"><div class="comm-title">東京美食朝聖 7 天懶人包</div><div class="comm-meta">📍 東京 · 7 天 · 34 個景點</div><div class="comm-foot"><span class="comm-author">👤 旅遊達人 Mia</span><span class="comm-likes">❤️ 1.2k</span></div></div>
+      </div>
+      <div class="comm-card">
+        <div class="comm-img d-ba"><div class="comm-ov"></div><span style="position:relative;z-index:1">🌅</span></div>
+        <div class="comm-body"><div class="comm-title">峇里島靈性之旅 5 天</div><div class="comm-meta">📍 峇里島 · 5 天 · 18 個景點</div><div class="comm-foot"><span class="comm-author">👤 Ken 的旅記</span><span class="comm-likes">❤️ 876</span></div></div>
+      </div>
+      <div style="height:12px"></div>
+    </div>
+  </div>
+
+  <!-- ══ S5: 我的 ══ -->
+  <div class="screen" id="s5">
+    <div class="profile-hero">
+      <div class="p-av">😊</div>
+      <div class="p-name">旅行者 Alex</div>
+      <div class="p-sub">已連結 Google 帳號</div>
+      <div class="p-stats">
+        <div class="pst"><div class="pst-n">8</div><div class="pst-l">次旅行</div></div>
+        <div class="pst"><div class="pst-n">142</div><div class="pst-l">個景點</div></div>
+        <div class="pst"><div class="pst-n">23</div><div class="pst-l">國家</div></div>
+      </div>
+    </div>
+    <div class="s5-content">
+      <div style="height:12px"></div>
+      <div class="stt-group">
+        <div class="stt-row"><div class="stt-icon" style="background:#EBF4FF">📍</div><div class="stt-label">我的收藏景點</div><div class="stt-arrow">›</div></div>
+        <div class="stt-row"><div class="stt-icon" style="background:#E8F8EE">🗺</div><div class="stt-label">匯入 Google My Maps</div><div class="stt-arrow">›</div></div>
+        <div class="stt-row"><div class="stt-icon" style="background:#FFF3EC">📤</div><div class="stt-label">分享我的行程</div><div class="stt-arrow">›</div></div>
+      </div>
+      <div style="height:12px"></div>
+      <div class="stt-group">
+        <div class="stt-row"><div class="stt-icon" style="background:#F3E8FF">💬</div><div class="stt-label">語言</div><div class="stt-val">繁體中文</div><div class="stt-arrow">›</div></div>
+        <div class="stt-row"><div class="stt-icon" style="background:#FFF3EC">🌙</div><div class="stt-label">外觀</div><div class="stt-val">跟隨系統</div><div class="stt-arrow">›</div></div>
+        <div class="stt-row"><div class="stt-icon" style="background:#E8F5E9">🔔</div><div class="stt-label">通知</div><div class="stt-arrow">›</div></div>
+      </div>
+      <div style="height:12px"></div>
+      <div class="stt-group">
+        <div class="stt-row" style="justify-content:center"><span style="font-size:15px;color:#FF3B30;font-weight:500">登出</span></div>
+      </div>
+      <div style="height:32px"></div>
+    </div>
+  </div>
+
+  <!-- ══ Tab Bar ══ -->
+  <div class="tab-bar">
+    <div class="tab-item active" id="t0" onclick="go(1)">
+      <div class="tab-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" fill="#007AFF"/></svg></div>
+      <div class="tab-label" style="color:#007AFF">地圖</div>
+    </div>
+    <div class="tab-item" id="t1" onclick="go(2)">
+      <div class="tab-icon" style="position:relative"><svg viewBox="0 0 24 24"><path d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 18H5V8h14v11z" fill="#8E8E93"/></svg><div class="tab-badge">2</div></div>
+      <div class="tab-label">行程</div>
+    </div>
+    <div class="tab-item" id="t2" onclick="go(4)">
+      <div class="tab-icon"><svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="#8E8E93"/></svg></div>
+      <div class="tab-label">探索</div>
+    </div>
+    <div class="tab-item" id="t3" onclick="go(5)">
+      <div class="tab-icon"><svg viewBox="0 0 24 24"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" fill="#8E8E93"/></svg></div>
+      <div class="tab-label">我的</div>
+    </div>
   </div>
 </div>
+
+<script>
+function go(n) {
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('s'+n).classList.add('active');
+  const map={1:0,2:1,3:1,4:2,5:3};
+  document.querySelectorAll('.tab-item').forEach((t,i)=>{
+    t.classList.remove('active');
+    t.querySelector('.tab-label').style.color='';
+    t.querySelectorAll('svg path').forEach(p=>p.style.fill='');
+  });
+  const ti=map[n]??0;
+  const tab=document.getElementById('t'+ti);
+  tab.classList.add('active');
+  tab.querySelector('.tab-label').style.color='#007AFF';
+  tab.querySelectorAll('svg path').forEach(p=>p.style.fill='#007AFF');
+}
+function setSeg(el){
+  el.parentElement.querySelectorAll('.seg-item').forEach(s=>s.classList.remove('active'));
+  el.classList.add('active');
+}
+function setDay(el){
+  el.parentElement.querySelectorAll('.day-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+}
+function makeDrag(dhId,mapId,min,max){
+  const dh=document.getElementById(dhId),map=document.getElementById(mapId);
+  let on=false,sy=0,sh=0;
+  dh.addEventListener('pointerdown',e=>{on=true;sy=e.clientY;sh=map.offsetHeight;dh.setPointerCapture(e.pointerId);e.preventDefault();});
+  dh.addEventListener('pointermove',e=>{if(!on)return;map.style.height=Math.min(Math.max(sh+e.clientY-sy,min),max)+'px';});
+  dh.addEventListener('pointerup',()=>on=false);
+}
+makeDrag('dh1','m1',80,380);
+makeDrag('dh3','m3',80,380);
+go(1);
+</script>
 </body>
 </html>
