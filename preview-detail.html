@@ -618,7 +618,7 @@ body {
         <div class="settings-item"><span class="si">🔔</span><span class="sl">通知設定</span><span class="sa">›</span></div>
         <div class="settings-item"><span class="si">🌏</span><span class="sl">語言與地區</span><span class="sa">›</span></div>
         <div class="settings-item"><span class="si">🔒</span><span class="sl">隱私設定</span><span class="sa">›</span></div>
-        <div class="settings-item" id="sync-row"><span class="si">☁️</span><span class="sl" id="sync-label">雲端同步（Firebase）</span><span class="sa" id="sync-status" style="color:#34C759;font-size:16px;">✓</span></div>
+        <div class="settings-item" id="sync-row"><span class="si">☁️</span><span class="sl" id="sync-label">雲端同步（）</span><span class="sa" id="sync-status" style="color:#34C759;font-size:16px;">✓</span></div>
       </div>
       <button class="logout-btn" onclick="handleLogout()">登出</button>
       <div style="height:20px"></div>
@@ -657,14 +657,15 @@ body {
 // ⚙️ 填入你的 API Keys（訪客模式不需要）
 // ══════════════════════════════════════
 const FIREBASE_CONFIG = {
-  apiKey:            'YOUR_FIREBASE_API_KEY',
-  authDomain:        'YOUR_PROJECT.firebaseapp.com',
-  projectId:         'YOUR_PROJECT_ID',
-  storageBucket:     'YOUR_PROJECT.appspot.com',
-  messagingSenderId: 'YOUR_SENDER_ID',
-  appId:             'YOUR_APP_ID'
+  apiKey: "AIzaSyBvbz07UEwVw7K3tI4JcLcW2tXkqf_bksw",
+  authDomain: "localbite-8e154.firebaseapp.com",
+  databaseURL: "https://localbite-8e154-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "localbite-8e154",
+  storageBucket: "localbite-8e154.firebasestorage.app",
+  messagingSenderId: "798128436129",
+  appId: "1:798128436129:web:b8d2ec5db4d745cb4c91e0",
 };
-const GOOGLE_MAPS_API_KEY = 'YOUR_GOOGLE_MAPS_API_KEY';
+const GOOGLE_MAPS_API_KEY = 'AIzaSyCJ-2_o9yLddGh5HBDq0-tjVTZ3a_A0YC4';
 // ══════════════════════════════════════
 
 firebase.initializeApp(FIREBASE_CONFIG);
