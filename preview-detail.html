@@ -310,10 +310,24 @@ let isGuest = false;
 let currentUser = null;
 let loginMethod = '';
 
+// ✅ 修正：處理 Google Redirect 回來後的登入結果
+auth.getRedirectResult().then(result => {
+  if (result && result.user) {
+    loginMethod = '🔵 Google 登入';
+    showToast('✓ Google 登入成功！');
+  }
+}).catch(e => {
+  console.error('Redirect result error:', e);
+  if (e.code && e.code !== 'auth/no-auth-event') {
+    const err = document.getElementById('login-error');
+    if (err) showError(err, '❌ Google 登入失敗：' + mapAuthError(e.code));
+  }
+});
+
 auth.onAuthStateChanged(user => {
   if (user && !isGuest) {
     currentUser = user;
-    loginMethod = 'Google / Email';
+    if (!loginMethod) loginMethod = '🔵 Google / 📧 Email';
     showApp();
     updateProfileUI();
   } else if (!isGuest) {
@@ -326,7 +340,7 @@ function showApp() {
   document.getElementById('login-overlay').classList.add('hidden');
   document.getElementById('app-header').style.display = 'block';
   document.getElementById('app-phone').style.display = 'block';
-  updateClock(); 
+  updateClock();
   setInterval(updateClock, 30000);
 }
 
@@ -354,10 +368,8 @@ async function handleLogin() {
   const pw = document.getElementById('login-password').value;
   const btn = document.getElementById('login-btn');
   const err = document.getElementById('login-error');
-  
   clearError(err);
   if (!email || !pw) { showError(err, '請填入電子郵件和密碼'); return; }
-  
   try {
     btn.disabled = true;
     btn.textContent = '登入中...';
@@ -378,11 +390,9 @@ async function handleRegister() {
   const pw = document.getElementById('reg-password').value;
   const btn = document.getElementById('register-btn');
   const err = document.getElementById('register-error');
-  
   clearError(err);
   if (!name || !email || !pw) { showError(err, '請填寫所有欄位'); return; }
   if (pw.length < 6) { showError(err, '密碼至少需要 6 個字元'); return; }
-  
   try {
     btn.disabled = true;
     btn.textContent = '建立中...';
@@ -398,33 +408,48 @@ async function handleRegister() {
   }
 }
 
+// ✅ 修正：Popup 失敗時自動改用 Redirect
 async function handleGoogleLogin() {
   const btn = document.getElementById('google-btn');
   const err = document.getElementById('login-error');
-  
   clearError(err);
+  btn.disabled = true;
+  document.getElementById('google-text').textContent = '連接中...';
+
+  const provider = new firebase.auth.GoogleAuthProvider();
+  provider.addScope('profile');
+  provider.addScope('email');
+  provider.setCustomParameters({ prompt: 'select_account' });
+
   try {
-    btn.disabled = true;
-    document.getElementById('google-text').textContent = '連接中...';
-    
-    const provider = new firebase.auth.GoogleAuthProvider();
-    provider.addScope('profile');
-    provider.addScope('email');
-    
     await auth.signInWithPopup(provider);
     loginMethod = '🔵 Google 登入';
     showToast('✓ Google 登入成功！');
-  } catch(e) {
-    console.error('Google Login Error:', e);
-    
-    if (e.code === 'auth/popup-blocked') {
-      showError(err, '🔒 登入視窗被擋。請允許彈窗權限。');
-    } else if (e.code === 'auth/popup-closed-by-user') {
-      showError(err, '❌ 登入視窗已關閉。');
-    } else if (e.code === 'auth/unauthorized-domain') {
-      showError(err, '⚠️ 本地開發：此域名未授權。建議使用電子郵件登入或訪客模式。');
+  } catch(popupErr) {
+    console.warn('Popup failed, trying redirect:', popupErr.code);
+    if (
+      popupErr.code === 'auth/popup-blocked' ||
+      popupErr.code === 'auth/cancelled-popup-request'
+    ) {
+      try {
+        document.getElementById('google-text').textContent = '正在跳轉...';
+        await auth.signInWithRedirect(provider);
+        return;
+      } catch(redirectErr) {
+        showError(err, '❌ ' + mapAuthError(redirectErr.code));
+      }
+    } else if (popupErr.code === 'auth/popup-closed-by-user') {
+      showError(err, '❌ 登入視窗已關閉，請再試一次。');
+    } else if (popupErr.code === 'auth/unauthorized-domain') {
+      try {
+        document.getElementById('google-text').textContent = '正在跳轉...';
+        await auth.signInWithRedirect(provider);
+        return;
+      } catch(redirectErr) {
+        showError(err, '⚠️ 此域名尚未授權 Google 登入。請在 Firebase Console 新增授權域名，或改用電子郵件 / 訪客模式。');
+      }
     } else {
-      showError(err, '❌ ' + mapAuthError(e.code));
+      showError(err, '❌ ' + mapAuthError(popupErr.code));
     }
   } finally {
     btn.disabled = false;
@@ -501,7 +526,6 @@ function switchScreen(name) {
     n.querySelector('span').style.color = '';
     n.querySelectorAll('svg path').forEach(p => p.setAttribute('fill','#8E8E93'));
   });
-  
   document.getElementById('screen-' + name).classList.add('active');
   const nav = document.getElementById('nav-' + name);
   nav.classList.add('active');
@@ -511,13 +535,11 @@ function switchScreen(name) {
 
 function updateProfileUI() {
   if (!currentUser) return;
-  
   const name = currentUser.displayName || '使用者';
   document.getElementById('profile-name').textContent = name;
   document.getElementById('profile-email').textContent = currentUser.email || '';
   document.getElementById('profile-avatar').textContent = name.charAt(0).toUpperCase();
   document.getElementById('login-type').textContent = '登入方式：' + loginMethod;
-  
   if (isGuest) {
     document.getElementById('profile-badge').textContent = '👤 訪客模式';
     document.getElementById('profile-badge').style.background = '#FFF3EC';
